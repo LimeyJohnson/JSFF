@@ -13,12 +13,12 @@ namespace FriendsLibrary
         [ScriptName("FB")]
         public static class Facebook
         {
-            public delegate void apiResponse(object response);
-            
-            public static void init(InitOptions options)
-            {
-            }
-            public static void api(string apiCall, apiResponse response) { }
+            public delegate void ApiDelegate(ApiResponse response);
+            public delegate void LoginDelegate(LoginResponse response);
+            public static void init(InitOptions options){}
+            public static void api(string apiCall, ApiDelegate response) { }
+            public static void login(LoginDelegate d) { }
+            public static void login(LoginDelegate d, LoginOptions options) { }
         }
         [Imported, IgnoreNamespace, ScriptName("Object")]
         public sealed class InitOptions
@@ -29,6 +29,20 @@ namespace FriendsLibrary
             public bool cookie;
             public bool xfbml;
         }
+    public sealed class LoginResponse
+    {
+        public bool authResponse;
+
+    }
+    [Imported, IgnoreNamespace, ScriptName("Object")]
+    public sealed class LoginOptions
+    {
+        public string scope;
+    }
+    public sealed class ApiResponse
+    {
+        public string name;
+    }
     
         //[Imported]
         //[IgnoreNamespace]

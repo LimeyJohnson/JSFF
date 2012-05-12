@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Html;
 using FriendsLibrary;
+using jQueryApi;
 namespace JSFFScript
 {
 
@@ -12,21 +13,39 @@ namespace JSFFScript
     {
         static FFJS()
         {
-        
+            jQuery.OnDocumentReady(new Action(Onload));
+        }
+        public static void ButtonClicked(jQueryEvent e)
+        {
+            Script.Alert("About to Log in");
+            Facebook.login(delegate(LoginResponse response)
+            {
+                if (response.authResponse)
+                {
+                    Script.Alert("Logged in");
+
+                    Facebook.api("/me", delegate(ApiResponse apiResponse) {
+                        Script.Alert("Good to see you" + apiResponse.name);
+                    });
+                }
+                else
+                {
+                    Script.Alert("Not Logged in ");
+                }
+            }
+                );
+        }
+        public static void Onload()
+        {
             InitOptions options = new InitOptions();
             options.appId = "240082229369859";
             options.cookie = true;
             options.xfbml = false;
-            options.channelUrl = "http://limeyhouse.dyndns.org/channel.aspx";
+            options.channelUrl = "limeyhouse.dyndns.org/channel.aspx";
             options.status = false;
 
             Facebook.init(options);
-            Script.Alert("Go TO BED");
-
-        }
-        public static void ButtonClicked(object sender, EventArgs e)
-        {
-            Script.Alert("this worked");
+            jQuery.Select("#MyButton").Click(new jQueryEventHandler(ButtonClicked));
         }
     }
 }
