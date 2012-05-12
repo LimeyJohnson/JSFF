@@ -15,11 +15,12 @@ JSFFScript._FFJS = function JSFFScript__FFJS() {
 JSFFScript._FFJS.registerClass('JSFFScript._FFJS');
 (function () {
     var options = {};
-    options.appId = 'Somethings';
-    options.cookie = false;
-    window.addEventListener('load', function(e) {
-        FB.init(options);
-    }, false);
+    options.appId = '240082229369859';
+    options.cookie = true;
+    options.xfbml = false;
+    options.channelUrl = 'http://limeyhouse.dyndns.org/channel.aspx';
+    options.status = false;
+    FB.init(options);
 })();
 })();
 

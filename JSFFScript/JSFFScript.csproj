@@ -22,7 +22,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>pdbonly</DebugType>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;CODE_ANALYSIS;SCRIPTSHARP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -32,7 +32,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>pdbonly</DebugType>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>CODE_ANALYSIS;SCRIPTSHARP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -50,9 +50,9 @@
     <Compile Include="FFJS.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FacebookLibrary\FacebookLibrary.csproj">
-      <Project>{6099A4EE-8F7A-4183-B78E-6DA16EDD5F63}</Project>
-      <Name>FacebookLibrary</Name>
+    <ProjectReference Include="..\FriendsLibrary\FriendsLibrary.csproj">
+      <Project>{C41C452A-52DD-4C02-B885-D2976DE2AE1F}</Project>
+      <Name>FriendsLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(ProgramFiles)\ScriptSharp\v1.0\ScriptSharp.targets" />

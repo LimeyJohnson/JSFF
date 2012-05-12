@@ -5,18 +5,20 @@ using System;
 using System.Html;
 using System.Runtime.CompilerServices;
 
-namespace FacebookLibrary
+namespace FriendsLibrary
 {
 
-   
         [Imported]
         [IgnoreNamespace]
         [ScriptName("FB")]
         public static class Facebook
         {
+            delegate void apiResponse(object response);
+            
             public static void init(InitOptions options)
             {
             }
+            public static void api(string apiCall, apiResponse response);
         }
         [Imported, IgnoreNamespace, ScriptName("Object")]
         public sealed class InitOptions
@@ -70,4 +72,5 @@ namespace FacebookLibrary
 
         
     }
+
 
