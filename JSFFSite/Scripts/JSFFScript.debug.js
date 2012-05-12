@@ -10,6 +10,13 @@ Type.registerNamespace('JSFFScript');
 
 JSFFScript._FFJS = function JSFFScript__FFJS() {
 }
+JSFFScript._FFJS.buttonClicked = function JSFFScript__FFJS$buttonClicked(sender, e) {
+    /// <param name="sender" type="Object">
+    /// </param>
+    /// <param name="e" type="ss.EventArgs">
+    /// </param>
+    alert('this worked');
+}
 
 
 JSFFScript._FFJS.registerClass('JSFFScript._FFJS');
@@ -21,6 +28,7 @@ JSFFScript._FFJS.registerClass('JSFFScript._FFJS');
     options.channelUrl = 'http://limeyhouse.dyndns.org/channel.aspx';
     options.status = false;
     FB.init(options);
+    alert('Go TO BED');
 })();
 })();
 

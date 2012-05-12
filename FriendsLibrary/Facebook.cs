@@ -13,12 +13,12 @@ namespace FriendsLibrary
         [ScriptName("FB")]
         public static class Facebook
         {
-            delegate void apiResponse(object response);
+            public delegate void apiResponse(object response);
             
             public static void init(InitOptions options)
             {
             }
-            public static void api(string apiCall, apiResponse response);
+            public static void api(string apiCall, apiResponse response) { }
         }
         [Imported, IgnoreNamespace, ScriptName("Object")]
         public sealed class InitOptions

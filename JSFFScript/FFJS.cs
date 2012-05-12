@@ -21,8 +21,8 @@ namespace JSFFScript
             options.status = false;
 
             Facebook.init(options);
-            InputElement button = (InputElement)Document.GetElementById("MyButton");
-            Button b = new Button(Document.GetElementById("MyButton");
+            Script.Alert("Go TO BED");
+
         }
         public static void ButtonClicked(object sender, EventArgs e)
         {
