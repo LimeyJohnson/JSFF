@@ -11,39 +11,45 @@ namespace JSFFScript
 
     internal static class FFJS
     {
+        public static string UserID;
         static FFJS()
         {
             jQuery.OnDocumentReady(new Action(Onload));
         }
         public static void ButtonClicked(jQueryEvent e)
         {
-            Script.Alert("About to Log in");
-            LoginOptions options = new LoginOptions();
-            options.scope = "email, user_likes, publish_stream";
-            Facebook.login(delegate(LoginResponse response)
+            Facebook.getLoginStatus(delegate(LoginResponse loginResponse)
             {
-                if (response.authResponse)
+                if (loginResponse.status == "connected")
                 {
-                    Script.Alert("Logged in");
-
-                    Facebook.api("/me", delegate(ApiResponse apiResponse)
-                    {
-                        Script.Alert("Good to see you" + apiResponse.name);
-                        ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + apiResponse.id + "/picture";
-                    });
+                    UserID = loginResponse.authResponse.userID;
+                    ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + UserID + "/picture";
                 }
                 else
                 {
-                    Script.Alert("Not Logged in ");
+                    LoginOptions options = new LoginOptions();
+                    options.scope = "email, user_likes, publish_stream";
+                    Facebook.login(delegate(LoginResponse response)
+                    {
+                        if (!Script.IsNull(response))
+                        {
+                            UserID = response.authResponse.userID;
+                            ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + UserID + "/picture";
+                        }
+                        else
+                        {
+                            Script.Alert("Not Logged in ");
+                        }
+                    }, options
+                        );
                 }
-            }, options
-                );
+            });
+
         }
         public static void Post(jQueryEvent e)
         {
             ApiOptions options = new ApiOptions();
-            options.message = "Gig'EM";
-            Facebook.api("/me/feed", "post", options, delegate(ApiResponse apiResponse)
+            Facebook.api("/me/friends", delegate(ApiResponse apiResponse)
             {
                 if (Script.IsNull(apiResponse) || !Script.IsNullOrUndefined(apiResponse.error))
                 {
@@ -51,20 +57,25 @@ namespace JSFFScript
                 }
                 else
                 {
-                    Script.Alert("Posted correctly");
+                    Queries q = new Queries();
+                    q.friendsLimit = "SELECT uid1, uid2 from friend WHERE uid1 = " + UserID + " ORDER BY uid2";
+                    q.friendsAll = "SELECT uid1, uid2 from friend WHERE uid1 = " + UserID;
+                    q.friendsoffriends = "SELECT uid1, uid2 FROM friend WHERE uid1 IN (SELECT uid2 from #friendsLimit) AND uid2 IN (SELECT uid2 from #friendsAll) AND uid1 < uid2";
+
+                    ApiOptions queryOptions = new ApiOptions();
+                    queryOptions.method = "fql.multiquery";
+                    queryOptions.queries = q;
+
+                    Facebook.api(queryOptions, delegate(QueryResponse[] queryResponse)
+                    {
+                        Script.Alert(queryResponse[2].fql_result_set.Length);
+                    }
+                    );
                 }
             });
         }
         public static void Onload()
         {
-            InitOptions options = new InitOptions();
-            options.appId = "240082229369859";
-            options.cookie = true;
-            options.xfbml = false;
-            options.channelUrl = "limeyhouse.dyndns.org/channel.aspx";
-            options.status = false;
-
-            Facebook.init(options);
             jQuery.Select("#MyButton").Click(new jQueryEventHandler(ButtonClicked));
             jQuery.Select("#PostButton").Click(new jQueryEventHandler(Post));
         }

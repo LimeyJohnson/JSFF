@@ -14,12 +14,15 @@ namespace FriendsLibrary
         public static class Facebook
         {
             public delegate void ApiDelegate(ApiResponse response);
+            public delegate void QueryDelgate(QueryResponse[] response);
             public delegate void LoginDelegate(LoginResponse response);
             public static void init(InitOptions options){}
             public static void api(string apiCall, ApiDelegate response) { }
             public static void api(string apiCall, string noun, ApiOptions options, ApiDelegate response) { }
+            public static void api(ApiOptions options, QueryDelgate response) { }
             public static void login(LoginDelegate d) { }
             public static void login(LoginDelegate d, LoginOptions options) { }
+            public static void getLoginStatus(LoginDelegate response) { }
         }
         [Imported, IgnoreNamespace, ScriptName("Object")]
         public sealed class InitOptions
@@ -32,8 +35,14 @@ namespace FriendsLibrary
         }
     public sealed class LoginResponse
     {
-        public bool authResponse;
+        public AuthResponse authResponse;
+        public string status;
 
+    }
+    public class AuthResponse
+    {
+        public string userID;
+        public string accessToken;
     }
     [Imported, IgnoreNamespace, ScriptName("Object")]
     public sealed class LoginOptions
@@ -44,12 +53,37 @@ namespace FriendsLibrary
     public sealed class ApiOptions
     {
         public string message;
+        public string method;
+        public Queries queries;
     }
+    [Imported, IgnoreNamespace, ScriptName("Object")]
+     public sealed class Queries
+     {
+          public string friendsAll;
+         public string friendsLimit;
+         public string friendsoffriends;
+     }
     public sealed class ApiResponse
     {
         public string name;
         public string id;
         public string error;
+        public Friend[] data;
+    }
+    public sealed class QueryResponse
+    {
+        public MultiQueryResults[] fql_result_set;
+    }
+    public sealed class MultiQueryResults
+    {
+        public string uid1;
+        public string uid2;
+    }
+    public sealed class Friend
+    {
+        public string name;
+        public string id;
+        public int[] connections;
     }
        
         //[Imported]

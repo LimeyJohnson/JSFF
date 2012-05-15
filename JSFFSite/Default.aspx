@@ -9,17 +9,30 @@
     <title>Friends Graph</title>
 </head>
 <body>
+
+
     <form id="form1" runat="server">
-    <div id="fb-root"> 
     <img id="image" alt="Profile Pic" width="100", height="100"/>
-    </div>
-    <div class="fb-login-button"></div>
-    <button id="MyButton" title="Clickme">Something</button>
-    <button id="PostButton" title="Clickme">Post</button>
+    <div class="fb-login-button">
+    <div id="fb-root"> 
+<script src="//connect.facebook.net/en_US/all.js"></script>
+<script>
+    FB.init({
+        appId: '240082229369859', // App ID
+        channelUrl: '//limeyhouse.dyndns.org/channel.aspx', // Channel File
+        status: false, // check login status
+        cookie: true, // enable cookies to allow the server to access the session
+        xfbml: true  // parse XFBML
+    });
+</script> 
+    <button id="MyButton" title="Clickme">LogIn</button>
+    <button id="PostButton" title="Clickme">FriendConnectionCount</button>
+    
     </form>
-     <script type="text/javascript" src="http://connect.facebook.net/en_US/all.js" ></script>
+     
     <script type="text/javascript" src="Scripts/jquery-1.4.1.js"></script>
     <script type="text/javascript" src="Scripts/mscorlib.js"></script>
     <script type="text/javascript" src="Scripts/JSFFScript.debug.js"></script>
+    
 </body>
 </html>
