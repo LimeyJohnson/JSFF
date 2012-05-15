@@ -11,9 +11,11 @@
 <body>
     <form id="form1" runat="server">
     <div id="fb-root"> 
+    <img id="image" alt="Profile Pic" width="100", height="100"/>
     </div>
     <div class="fb-login-button"></div>
     <button id="MyButton" title="Clickme">Something</button>
+    <button id="PostButton" title="Clickme">Post</button>
     </form>
      <script type="text/javascript" src="http://connect.facebook.net/en_US/all.js" ></script>
     <script type="text/javascript" src="Scripts/jquery-1.4.1.js"></script>

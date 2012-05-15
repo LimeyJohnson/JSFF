@@ -17,6 +17,7 @@ namespace FriendsLibrary
             public delegate void LoginDelegate(LoginResponse response);
             public static void init(InitOptions options){}
             public static void api(string apiCall, ApiDelegate response) { }
+            public static void api(string apiCall, string noun, ApiOptions options, ApiDelegate response) { }
             public static void login(LoginDelegate d) { }
             public static void login(LoginDelegate d, LoginOptions options) { }
         }
@@ -39,11 +40,18 @@ namespace FriendsLibrary
     {
         public string scope;
     }
+     [Imported, IgnoreNamespace, ScriptName("Object")]
+    public sealed class ApiOptions
+    {
+        public string message;
+    }
     public sealed class ApiResponse
     {
         public string name;
+        public string id;
+        public string error;
     }
-    
+       
         //[Imported]
         //[IgnoreNamespace]
         //internal sealed class PhotoCollection : Record {
