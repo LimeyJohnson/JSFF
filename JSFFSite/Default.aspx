@@ -13,10 +13,10 @@
 
     <form id="form1" runat="server">
     <img id="image" alt="Profile Pic" width="100", height="100"/>
-    <div class="fb-login-button">
-    <div id="fb-root"> 
-<script src="//connect.facebook.net/en_US/all.js"></script>
-<script>
+    <div class="fb-login-button"></div>
+    <div id="fb-root"></div>
+<script type="text/javascript" src="//connect.facebook.net/en_US/all.js"></script>
+<script type="text/javascript">
     FB.init({
         appId: '240082229369859', // App ID
         channelUrl: '//limeyhouse.dyndns.org/channel.aspx', // Channel File
@@ -27,9 +27,9 @@
 </script> 
     <button id="MyButton" title="Clickme">LogIn</button>
     <button id="PostButton" title="Clickme">FriendConnectionCount</button>
-    
+    <button id="LogoutButton" title="Clickme">Logout</button>
+    <div id="resultsDiv">Results Here</div>
     </form>
-     
     <script type="text/javascript" src="Scripts/jquery-1.4.1.js"></script>
     <script type="text/javascript" src="Scripts/mscorlib.js"></script>
     <script type="text/javascript" src="Scripts/JSFFScript.debug.js"></script>

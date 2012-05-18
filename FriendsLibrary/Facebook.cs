@@ -4,7 +4,7 @@
 using System;
 using System.Html;
 using System.Runtime.CompilerServices;
-
+using System.Collections;
 namespace FriendsLibrary
 {
 
@@ -16,12 +16,14 @@ namespace FriendsLibrary
             public delegate void ApiDelegate(ApiResponse response);
             public delegate void QueryDelgate(QueryResponse[] response);
             public delegate void LoginDelegate(LoginResponse response);
+            public delegate void LogoutDelegate();
             public static void init(InitOptions options){}
             public static void api(string apiCall, ApiDelegate response) { }
             public static void api(string apiCall, string noun, ApiOptions options, ApiDelegate response) { }
             public static void api(ApiOptions options, QueryDelgate response) { }
             public static void login(LoginDelegate d) { }
             public static void login(LoginDelegate d, LoginOptions options) { }
+            public static void logout(LogoutDelegate d) { }
             public static void getLoginStatus(LoginDelegate response) { }
         }
         [Imported, IgnoreNamespace, ScriptName("Object")]
@@ -70,20 +72,23 @@ namespace FriendsLibrary
         public string error;
         public Friend[] data;
     }
+    [Imported, IgnoreNamespace, ScriptName("Object")]
     public sealed class QueryResponse
     {
         public MultiQueryResults[] fql_result_set;
     }
+    [Imported, IgnoreNamespace, ScriptName("Object")]
     public sealed class MultiQueryResults
     {
         public string uid1;
         public string uid2;
     }
+    [Imported, IgnoreNamespace, ScriptName("Object")]
     public sealed class Friend
     {
         public string name;
         public string id;
-        public int[] connections;
+        public string[] connections;
     }
        
         //[Imported]

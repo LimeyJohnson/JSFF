@@ -11,6 +11,8 @@ Type.registerNamespace('JSFFScript');
 JSFFScript._FFJS = function JSFFScript__FFJS() {
     /// <field name="userID" type="String" static="true">
     /// </field>
+    /// <field name="friends" type="Object" static="true">
+    /// </field>
 }
 JSFFScript._FFJS.buttonClicked = function JSFFScript__FFJS$buttonClicked(e) {
     /// <param name="e" type="jQueryEvent">
@@ -40,6 +42,12 @@ JSFFScript._FFJS.post = function JSFFScript__FFJS$post(e) {
     /// </param>
     var options = {};
     FB.api('/me/friends', function(apiResponse) {
+        var $enum1 = ss.IEnumerator.getEnumerator(apiResponse.data);
+        while ($enum1.moveNext()) {
+            var f = $enum1.current;
+            f.connections = new Array(0);
+            JSFFScript._FFJS.friends[f.id] = f;
+        }
         if (ss.isNull(apiResponse) || !ss.isNullOrUndefined(apiResponse.error)) {
             alert('error occured');
         }
@@ -53,18 +61,45 @@ JSFFScript._FFJS.post = function JSFFScript__FFJS$post(e) {
             queryOptions.queries = q;
             FB.api(queryOptions, function(queryResponse) {
                 alert(queryResponse[2].fql_result_set.length);
+                var $enum1 = ss.IEnumerator.getEnumerator(queryResponse[2].fql_result_set);
+                while ($enum1.moveNext()) {
+                    var result = $enum1.current;
+                    (JSFFScript._FFJS.friends[result.uid1]).connections[(JSFFScript._FFJS.friends[result.uid1]).connections.length] = result.uid2;
+                }
+                alert(Object.getKeyCount(JSFFScript._FFJS.friends));
+                var s = '';
+                var $enum2 = ss.IEnumerator.getEnumerator(JSFFScript._FFJS.friends);
+                while ($enum2.moveNext()) {
+                    var f = $enum2.current;
+                    s += f.id + ' -> ';
+                    var $enum3 = ss.IEnumerator.getEnumerator(f.connections);
+                    while ($enum3.moveNext()) {
+                        var conns = $enum3.current;
+                        s += conns + ',';
+                    }
+                }
+                $('#resultsDiv').html(s);
             });
         }
     });
 }
+JSFFScript._FFJS.logOut = function JSFFScript__FFJS$logOut(e) {
+    /// <param name="e" type="jQueryEvent">
+    /// </param>
+    FB.logout(function() {
+    });
+    (document.getElementById('image')).src = '';
+}
 JSFFScript._FFJS.onload = function JSFFScript__FFJS$onload() {
     $('#MyButton').click(JSFFScript._FFJS.buttonClicked);
     $('#PostButton').click(JSFFScript._FFJS.post);
+    $('#LogoutButton').click(JSFFScript._FFJS.logOut);
 }
 
 
 JSFFScript._FFJS.registerClass('JSFFScript._FFJS');
 JSFFScript._FFJS.userID = null;
+JSFFScript._FFJS.friends = {};
 (function () {
     $(JSFFScript._FFJS.onload);
 })();
