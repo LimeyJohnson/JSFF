@@ -44,10 +44,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Facebook.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <ScriptInfo Include="Properties\ScriptInfo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JSFFSite\JSFFSite.csproj">
+      <Project>{49CC4D2E-AAF3-4F17-ACDE-EBBB56152FF1}</Project>
+      <Name>JSFFSite</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">

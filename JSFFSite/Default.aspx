@@ -22,7 +22,8 @@
         channelUrl: '//limeyhouse.dyndns.org/channel.aspx', // Channel File
         status: false, // check login status
         cookie: true, // enable cookies to allow the server to access the session
-        xfbml: true  // parse XFBML
+        xfbml: false
+          // parse XFBML
     });
 </script> 
     <button id="MyButton" title="Clickme">LogIn</button>

@@ -3,9 +3,9 @@
 
 using System;
 using System.Html;
-using FriendsLibrary;
 using jQueryApi;
 using System.Collections;
+using FreindsLibrary;
 namespace JSFFScript
 {
 
@@ -13,52 +13,28 @@ namespace JSFFScript
     {
         public static string UserID;
         public static Dictionary Friends = new Dictionary();
-      
+        public static bool debug = true;
         static FFJS()
         {
-            
+
             jQuery.OnDocumentReady(new Action(Onload));
         }
         public static void ButtonClicked(jQueryEvent e)
         {
-            Facebook.getLoginStatus(delegate(LoginResponse loginResponse)
-            {
-                if (loginResponse.status == "connected")
-                {
-                    UserID = loginResponse.authResponse.userID;
-                    ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + UserID + "/picture";
-                }
-                else
-                {
                     LoginOptions options = new LoginOptions();
                     options.scope = "email, user_likes, publish_stream";
-                    Facebook.login(delegate(LoginResponse response)
-                    {
-                        if (!Script.IsNull(response))
-                        {
-                            UserID = response.authResponse.userID;
-                            ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + UserID + "/picture";
-                        }
-                        else
-                        {
-                            Script.Alert("Not Logged in ");
-                        }
-                    }, options
-                        );
-                }
-            });
-
+                    Facebook.login(delegate(LoginResponse response) { }, options);
         }
         public static void Post(jQueryEvent e)
         {
             ApiOptions options = new ApiOptions();
             Facebook.api("/me/friends", delegate(ApiResponse apiResponse)
             {
-                foreach (Friend f in apiResponse.data)
+
+                for (int x = 0; x < apiResponse.data.Length; x++)
                 {
-                    f.connections = new string[0];
-                    Friends[f.id] = f;
-                                       
+                    Friend friend = new Friend(apiResponse.data[x]);
+                    Friends[friend.id] = friend;
                 }
                 if (Script.IsNull(apiResponse) || !Script.IsNullOrUndefined(apiResponse.error))
                 {
@@ -78,21 +54,25 @@ namespace JSFFScript
 
                     Facebook.api(queryOptions, delegate(QueryResponse[] queryResponse)
                     {
-                        Script.Alert(queryResponse[2].fql_result_set.Length);
-                        foreach (MultiQueryResults result in queryResponse[2].fql_result_set)
+                        if (debug) Script.Alert(queryResponse[2].fql_result_set.Length);
+                        for (int i = 0; i < queryResponse[2].fql_result_set.Length; i++)
                         {
-                            ((Friend)Friends[result.uid1]).connections[((Friend)Friends[result.uid1]).connections.Length] = result.uid2;
+                            MultiQueryResults results = queryResponse[2].fql_result_set[i];
+                            ((Friend)Friends[results.uid1]).connections.Add(results.uid2);
                         }
-                        Script.Alert(Friends.Count);
+                        if (debug) Script.Alert(Friends.Count);
                         string s = "";
-                        foreach (Friend f in Friends)
+                        for (int i = 0; i < Friends.Count; i++)
                         {
-                            s += f.id + " -> ";
-                            foreach (string conns in f.connections)
+                            Friend f = (Friend)Friends[Friends.Keys[i]];
+                            s += f.imagetag;
+                            s += " -> ";
+                            for (int x = 0; x < f.connections.Count; x++)
                             {
-                                s += conns + ",";
+                                Friend otherf = (Friend)Friends[(string)f.connections[x]];
+                                s += otherf.imagetag;
                             }
-                            
+                            s += "<br/>";
                         }
                         jQuery.Select("#resultsDiv").Html(s);
                     }
@@ -104,6 +84,7 @@ namespace JSFFScript
         {
             Facebook.logout(delegate() { });
             ((ImageElement)Document.GetElementById("image")).Src = "";
+            jQuery.Select("#resultsDiv").Html("");
 
         }
         public static void Onload()
@@ -111,6 +92,30 @@ namespace JSFFScript
             jQuery.Select("#MyButton").Click(new jQueryEventHandler(ButtonClicked));
             jQuery.Select("#PostButton").Click(new jQueryEventHandler(Post));
             jQuery.Select("#LogoutButton").Click(new jQueryEventHandler(LogOut));
+
+            Facebook.getLoginStatus(delegate(LoginResponse loginResponse)
+          {
+              if (loginResponse.status == "connected")
+              {
+                  UserID = loginResponse.authResponse.userID;
+                  ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + UserID + "/picture";
+              }
+          });
+            Facebook.Event.subscribe("auth.authResponseChange", delegate(EventChangeResponse response)
+            {
+                if (debug) Script.Alert("Event Login Fired");
+                if (response.status == "connected")
+                {
+                    UserID = response.userID;
+                    ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + response.userID + "/picture";
+                }
+                else
+                {
+                    Script.Alert("Not Logged in ");
+                }
+            });
         }
+
+
     }
 }
