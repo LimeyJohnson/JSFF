@@ -101,9 +101,7 @@ namespace FreindsLibrary
         public string name;
     }
     public delegate void EventChange(EventChangeResponse response);
-
-
-
+     
 }
 
 
