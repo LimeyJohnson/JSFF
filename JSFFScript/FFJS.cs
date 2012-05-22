@@ -13,9 +13,14 @@ namespace JSFFScript
 
     internal static class FFJS
     {
+        public static double imagesize = 0;
+        public static double imageOffSet = 10;
+        public static double picsperaxis = 0;
         public static string UserID;
         public static Dictionary Friends = new Dictionary();
         public static bool debug = false;
+         public static CanvasElement canvas;
+           public static CanvasContext2D canvasContext;
         static FFJS()
         {
             jQuery.OnDocumentReady(new Action(Onload));
@@ -28,14 +33,16 @@ namespace JSFFScript
         }
         public static void Post(jQueryEvent e)
         {
+            ClearCanvas();
             ApiOptions options = new ApiOptions();
             Facebook.api("/me/friends", delegate(ApiResponse apiResponse)
             {
-                CanvasElement canvas = Document.GetElementById("tutorial").As<CanvasElement>();
-                CanvasContext2D canvasContext = (CanvasContext2D)canvas.GetContext(Rendering.Render2D);
+                CalcPidData(apiResponse.data.Length);
                 for (int x = 0; x < apiResponse.data.Length; x++)
                 {
-                    Friend friend = new Friend(apiResponse.data[x], canvasContext);
+                    double xCord = (Math.Floor(x % picsperaxis) * (imagesize + imageOffSet)) + imageOffSet;
+                    double yCord = (Math.Floor(x / picsperaxis) * (imagesize + imageOffSet)) + imageOffSet;
+                    Friend friend = new Friend(apiResponse.data[x], canvasContext, xCord, yCord);
                     Friends[friend.id] = friend;
                 }
                 Queries q = new Queries();
@@ -59,15 +66,24 @@ namespace JSFFScript
                     if (debug) Script.Alert(Friends.Count);
                 }
                 );
-                for (int z = 0; z < Friends.Keys.Length; z++)
-                {
-                    Friend f = (Friend)Friends[Friends.Keys[z]];
-                    double y = Math.Floor(z / 20) * 50;
-                    double x = Math.Floor(z % 20) * 50;
-                    f.drawImage(x, y);
-                }
+              
 
             });
+            jQuery.Select("#tutorial").MouseMove(new jQueryEventHandler(MouseOverFriend));
+            jQuery.Select("#tutorial").Click(new jQueryEventHandler(CanvasClick));
+        }
+        public static void CalcPidData(int friendsCount)
+        {
+            int totalLenght = canvas.Width;
+            picsperaxis = Math.Ceil(Math.Sqrt(friendsCount));
+            imagesize = ((totalLenght - imageOffSet) / picsperaxis) - imageOffSet;
+        }
+        public static void ClearCanvas()
+        {
+            canvasContext.Save();
+            canvasContext.SetTransform(1, 0, 0, 1, 0, 0);
+            canvasContext.ClearRect(0, 0, canvas.Width, canvas.Height);
+            canvasContext.Restore();
         }
         public static void LogOut(jQueryEvent e)
         {
@@ -76,11 +92,61 @@ namespace JSFFScript
             jQuery.Select("#resultsDiv").Html("");
 
         }
+        public static void CanvasClick(jQueryEvent e)
+        {
+            ClearCanvas();
+            DrawFriends();
+            Friend f = PinPointFriend(e);
+            if (Script.IsNullOrUndefined(f)) return;
+            SelectFriends(f);
+            
+        }
+        public static void MouseOverFriend(jQueryEvent e)
+        {
+            Friend f = PinPointFriend(e);
+            string text = "";
+            if (!Script.IsNullOrUndefined(f)) text = f.name; 
+            jQuery.Select("#friendName").Text(text);
+        }
+        public static Friend PinPointFriend(jQueryEvent e)
+        {
+            for (int x = 0; x < Friends.Keys.Length; x++)
+            {
+                Friend f = (Friend)Friends[Friends.Keys[x]];
+                if (f.x < e.OffsetX && (f.x + imagesize) > e.OffsetX && f.y < e.OffsetY && (f.y + imagesize) > e.OffsetY)
+                {
+                    return f;
+                }
+            }
+            return null;
+        }
+        public static void SelectFriends(Friend friend)
+        {
+            
+            for (int x = 0; x < friend.connections.Count; x++)
+            {
+                Friend f = (Friend)Friends[(string)friend.connections[x]];
+                f.highlightSecondary();
+            }
+            friend.highlightPrimary();
+
+        }
+        public static void DrawFriends()
+        {
+            for (int x = 0; x < Friends.Keys.Length; x++)
+            {
+                Friend friend = (Friend)Friends[Friends.Keys[x]];
+                friend.drawImage();
+            }
+        }
         public static void Onload()
         {
+            canvas = Document.GetElementById("tutorial").As<CanvasElement>();
+             canvasContext = (CanvasContext2D)canvas.GetContext(Rendering.Render2D);
             jQuery.Select("#MyButton").Click(new jQueryEventHandler(ButtonClicked));
             jQuery.Select("#PostButton").Click(new jQueryEventHandler(Post));
             jQuery.Select("#LogoutButton").Click(new jQueryEventHandler(LogOut));
+           
             InitOptions options = new InitOptions();
             options.appId = "240082229369859";
             options.channelUrl = "//limeyhouse.dyndns.org/channel.aspx";

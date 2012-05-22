@@ -23,9 +23,10 @@
         FriendConnectionCount</button>
     <button id="LogoutButton" title="Clickme">
         Logout</button>
+        <label id="friendName"></label>
     <div id="resultsDiv">
     </div>
-    <canvas id="tutorial" width="1000" height="1000">
+    <canvas id="tutorial" width="800" height="800">
     </canvas>
     <div id="images">
     </div>
