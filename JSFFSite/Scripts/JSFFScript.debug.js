@@ -6,6 +6,123 @@
 Type.registerNamespace('JSFFScript');
 
 ////////////////////////////////////////////////////////////////////////////////
+// JSFFScript._class1
+
+JSFFScript._class1 = function JSFFScript__class1() {
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// JSFFScript.FriendsGroup
+
+JSFFScript.FriendsGroup = function JSFFScript_FriendsGroup(_Friends) {
+    /// <param name="_Friends" type="Object">
+    /// </param>
+    /// <field name="friends" type="Object">
+    /// </field>
+    /// <field name="repulsionConstant" type="Number">
+    /// </field>
+    /// <field name="attractionConstant" type="Number">
+    /// </field>
+    this.friends = _Friends;
+}
+JSFFScript.FriendsGroup.prototype = {
+    friends: null,
+    repulsionConstant: 0.01,
+    attractionConstant: 0.01,
+    
+    _repelForce: function JSFFScript_FriendsGroup$_repelForce(target, actor) {
+        /// <param name="target" type="JSFFScript.Friend">
+        /// </param>
+        /// <param name="actor" type="JSFFScript.Friend">
+        /// </param>
+        /// <returns type="JSFFScript.Vector"></returns>
+        var distance = this._getDistance(target.x, target.y, actor.x, actor.y);
+        var xUnit = (target.x - actor.x) / distance;
+        var yUnit = (target.y - actor.y) / distance;
+        var result = new JSFFScript.Vector();
+        result.xCord = xUnit / (this.repulsionConstant * distance * distance);
+        result.yCord = yUnit / (this.repulsionConstant * distance * distance);
+        return result;
+    },
+    
+    _attractForce: function JSFFScript_FriendsGroup$_attractForce(target, actor) {
+        /// <param name="target" type="JSFFScript.Friend">
+        /// </param>
+        /// <param name="actor" type="JSFFScript.Friend">
+        /// </param>
+        /// <returns type="JSFFScript.Vector"></returns>
+        var result = new JSFFScript.Vector();
+        result.xCord = this.attractionConstant * (actor.x - target.x);
+        result.yCord = this.attractionConstant * (actor.y - target.y);
+        return result;
+    },
+    
+    _getDistance: function JSFFScript_FriendsGroup$_getDistance(x1, y1, x2, y2) {
+        /// <param name="x1" type="Number">
+        /// </param>
+        /// <param name="y1" type="Number">
+        /// </param>
+        /// <param name="x2" type="Number">
+        /// </param>
+        /// <param name="y2" type="Number">
+        /// </param>
+        /// <returns type="Number"></returns>
+        var result = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2, y1));
+        return result;
+    },
+    
+    iterate: function JSFFScript_FriendsGroup$iterate() {
+        for (var x = 0; x < Object.keys(this.friends).length; x++) {
+            this.iterateSingle(Object.keys(this.friends)[x]);
+        }
+    },
+    
+    iterateSingle: function JSFFScript_FriendsGroup$iterateSingle(id) {
+        /// <param name="id" type="String">
+        /// </param>
+        var f = this.friends[id];
+        var netForce = new JSFFScript.Vector();
+        for (var y = 0; y < Object.keys(this.friends).length; y++) {
+            var b = this.friends[Object.keys(this.friends)[y]];
+            if (f.id !== b.id) {
+                if (f.connections.contains(b.id)) {
+                    netForce.add(this._attractForce(f, b));
+                }
+                else {
+                    netForce.add(this._repelForce(f, b));
+                }
+            }
+        }
+        f.x = f.x + netForce.xCord;
+        f.y = f.y + netForce.yCord;
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// JSFFScript.Vector
+
+JSFFScript.Vector = function JSFFScript_Vector() {
+    /// <field name="xCord" type="Number">
+    /// </field>
+    /// <field name="yCord" type="Number">
+    /// </field>
+}
+JSFFScript.Vector.prototype = {
+    xCord: 0,
+    yCord: 0,
+    
+    add: function JSFFScript_Vector$add(add) {
+        /// <param name="add" type="JSFFScript.Vector">
+        /// </param>
+        this.xCord += add.xCord;
+        this.yCord += add.yCord;
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 // JSFFScript.Friend
 
 JSFFScript.Friend = function JSFFScript_Friend(_response, _canvasContext, _x, _y) {
@@ -94,6 +211,8 @@ JSFFScript._FFJS = function JSFFScript__FFJS() {
     /// </field>
     /// <field name="picsperaxis" type="Number" static="true">
     /// </field>
+    /// <field name="iterator" type="Number" integer="true" static="true">
+    /// </field>
     /// <field name="userID" type="String" static="true">
     /// </field>
     /// <field name="friends" type="Object" static="true">
@@ -101,6 +220,8 @@ JSFFScript._FFJS = function JSFFScript__FFJS() {
     /// <field name="debug" type="Boolean" static="true">
     /// </field>
     /// <field name="canvas" type="Object" domElement="true" static="true">
+    /// </field>
+    /// <field name="group" type="JSFFScript.FriendsGroup" static="true">
     /// </field>
     /// <field name="canvasContext" type="CanvasContext2D" static="true">
     /// </field>
@@ -168,8 +289,6 @@ JSFFScript._FFJS.logOut = function JSFFScript__FFJS$logOut(e) {
     /// </param>
     FB.logout(function() {
     });
-    (document.getElementById('image')).src = '';
-    $('#resultsDiv').html('');
 }
 JSFFScript._FFJS.canvasClick = function JSFFScript__FFJS$canvasClick(e) {
     /// <param name="e" type="jQueryEvent">
@@ -210,13 +329,41 @@ JSFFScript._FFJS.selectFriends = function JSFFScript__FFJS$selectFriends(friend)
     for (var x = 0; x < friend.connections.length; x++) {
         var f = JSFFScript._FFJS.friends[friend.connections[x]];
         f.highlightSecondary();
+        JSFFScript._FFJS.drawLineBetweenFriends(friend, f);
     }
     friend.highlightPrimary();
+}
+JSFFScript._FFJS.drawLineBetweenFriends = function JSFFScript__FFJS$drawLineBetweenFriends(f1, f2) {
+    /// <param name="f1" type="JSFFScript.Friend">
+    /// </param>
+    /// <param name="f2" type="JSFFScript.Friend">
+    /// </param>
+    JSFFScript._FFJS.canvasContext.beginPath();
+    JSFFScript._FFJS.canvasContext.moveTo(f1.x, f1.y);
+    JSFFScript._FFJS.canvasContext.lineTo(f2.x, f2.y);
+    JSFFScript._FFJS.canvasContext.closePath();
+    JSFFScript._FFJS.canvasContext.stroke();
 }
 JSFFScript._FFJS.drawFriends = function JSFFScript__FFJS$drawFriends() {
     for (var x = 0; x < Object.keys(JSFFScript._FFJS.friends).length; x++) {
         var friend = JSFFScript._FFJS.friends[Object.keys(JSFFScript._FFJS.friends)[x]];
         friend.drawImage();
+    }
+}
+JSFFScript._FFJS.iterate = function JSFFScript__FFJS$iterate(e) {
+    /// <param name="e" type="jQueryEvent">
+    /// </param>
+    JSFFScript._FFJS.group = new JSFFScript.FriendsGroup(JSFFScript._FFJS.friends);
+    JSFFScript._FFJS.iterateSingle();
+}
+JSFFScript._FFJS.iterateSingle = function JSFFScript__FFJS$iterateSingle() {
+    var uid = Object.keys(JSFFScript._FFJS.friends)[JSFFScript._FFJS.iterator % Object.keys(JSFFScript._FFJS.friends).length];
+    JSFFScript._FFJS.group.iterateSingle(uid);
+    JSFFScript._FFJS.clearCanvas();
+    JSFFScript._FFJS.drawFriends();
+    JSFFScript._FFJS.iterator++;
+    if (JSFFScript._FFJS.iterator < 1000) {
+        window.setTimeout(JSFFScript._FFJS.iterateSingle, 50);
     }
 }
 JSFFScript._FFJS.onload = function JSFFScript__FFJS$onload() {
@@ -225,6 +372,7 @@ JSFFScript._FFJS.onload = function JSFFScript__FFJS$onload() {
     $('#MyButton').click(JSFFScript._FFJS.buttonClicked);
     $('#PostButton').click(JSFFScript._FFJS.post);
     $('#LogoutButton').click(JSFFScript._FFJS.logOut);
+    $('#Iterate').click(JSFFScript._FFJS.iterate);
     var options = {};
     options.appId = '240082229369859';
     options.channelUrl = '//limeyhouse.dyndns.org/channel.aspx';
@@ -243,25 +391,31 @@ JSFFScript._FFJS.onload = function JSFFScript__FFJS$onload() {
             alert('Event Login Fired');
         }
         if (response.status === 'connected') {
-            JSFFScript._FFJS.userID = response.userID;
-            (document.getElementById('image')).src = 'http://graph.facebook.com/' + response.userID + '/picture';
+            JSFFScript._FFJS.userID = response.authResponse.userID;
+            (document.getElementById('image')).src = 'http://graph.facebook.com/' + JSFFScript._FFJS.userID + '/picture';
         }
         else {
-            alert('Not Logged in ');
+            (document.getElementById('image')).src = '';
+            JSFFScript._FFJS.clearCanvas();
         }
     });
 }
 
 
+JSFFScript._class1.registerClass('JSFFScript._class1');
+JSFFScript.FriendsGroup.registerClass('JSFFScript.FriendsGroup');
+JSFFScript.Vector.registerClass('JSFFScript.Vector');
 JSFFScript.Friend.registerClass('JSFFScript.Friend');
 JSFFScript._FFJS.registerClass('JSFFScript._FFJS');
 JSFFScript._FFJS.imagesize = 0;
 JSFFScript._FFJS.imageOffSet = 10;
 JSFFScript._FFJS.picsperaxis = 0;
+JSFFScript._FFJS.iterator = 0;
 JSFFScript._FFJS.userID = null;
 JSFFScript._FFJS.friends = {};
 JSFFScript._FFJS.debug = false;
 JSFFScript._FFJS.canvas = null;
+JSFFScript._FFJS.group = null;
 JSFFScript._FFJS.canvasContext = null;
 (function () {
     $(JSFFScript._FFJS.onload);

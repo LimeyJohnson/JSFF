@@ -16,11 +16,13 @@ namespace JSFFScript
         public static double imagesize = 0;
         public static double imageOffSet = 10;
         public static double picsperaxis = 0;
+        public static int iterator = 0;
         public static string UserID;
         public static Dictionary Friends = new Dictionary();
         public static bool debug = false;
-         public static CanvasElement canvas;
-           public static CanvasContext2D canvasContext;
+        public static CanvasElement canvas;
+        public static FriendsGroup group;
+        public static CanvasContext2D canvasContext;
         static FFJS()
         {
             jQuery.OnDocumentReady(new Action(Onload));
@@ -42,7 +44,7 @@ namespace JSFFScript
                 {
                     double xCord = (Math.Floor(x % picsperaxis) * (imagesize + imageOffSet)) + imageOffSet;
                     double yCord = (Math.Floor(x / picsperaxis) * (imagesize + imageOffSet)) + imageOffSet;
-                    Friend friend = new Friend(apiResponse.data[x], canvasContext, xCord, yCord);
+                    Friend friend = new Friend(apiResponse.data[x], canvasContext, (int)xCord, (int)yCord);
                     Friends[friend.id] = friend;
                 }
                 Queries q = new Queries();
@@ -88,8 +90,7 @@ namespace JSFFScript
         public static void LogOut(jQueryEvent e)
         {
             Facebook.logout(delegate() { });
-            ((ImageElement)Document.GetElementById("image")).Src = "";
-            jQuery.Select("#resultsDiv").Html("");
+            
 
         }
         public static void CanvasClick(jQueryEvent e)
@@ -113,7 +114,7 @@ namespace JSFFScript
             for (int x = 0; x < Friends.Keys.Length; x++)
             {
                 Friend f = (Friend)Friends[Friends.Keys[x]];
-                if (f.x < e.OffsetX && (f.x + imagesize) > e.OffsetX && f.y < e.OffsetY && (f.y + imagesize) > e.OffsetY)
+                if (f.X < e.OffsetX && (f.X + imagesize) > e.OffsetX && f.Y < e.OffsetY && (f.Y + imagesize) > e.OffsetY)
                 {
                     return f;
                 }
@@ -127,9 +128,18 @@ namespace JSFFScript
             {
                 Friend f = (Friend)Friends[(string)friend.connections[x]];
                 f.highlightSecondary();
+                DrawLineBetweenFriends(friend, f);
             }
             friend.highlightPrimary();
 
+        }
+        public static void DrawLineBetweenFriends(Friend f1, Friend f2)
+        {
+            canvasContext.BeginPath();
+            canvasContext.MoveTo(f1.X, f1.Y);
+            canvasContext.LineTo(f2.X, f2.Y);
+            canvasContext.ClosePath();
+            canvasContext.Stroke();
         }
         public static void DrawFriends()
         {
@@ -139,6 +149,23 @@ namespace JSFFScript
                 friend.drawImage();
             }
         }
+        public static void Iterate(jQueryEvent e)
+        {
+            group = new FriendsGroup(Friends);
+            //group.iterate();
+            //ClearCanvas();
+            //DrawFriends();
+            IterateSingle();
+        }
+        public static void IterateSingle()
+        {
+            string uid = Friends.Keys[iterator % Friends.Keys.Length];
+            group.iterateSingle(uid);
+            ClearCanvas();
+            DrawFriends();
+            iterator++;
+            if (iterator < 1000) Window.SetTimeout(IterateSingle, 50);
+        }
         public static void Onload()
         {
             canvas = Document.GetElementById("tutorial").As<CanvasElement>();
@@ -146,7 +173,7 @@ namespace JSFFScript
             jQuery.Select("#MyButton").Click(new jQueryEventHandler(ButtonClicked));
             jQuery.Select("#PostButton").Click(new jQueryEventHandler(Post));
             jQuery.Select("#LogoutButton").Click(new jQueryEventHandler(LogOut));
-           
+            jQuery.Select("#Iterate").Click(new jQueryEventHandler(Iterate));
             InitOptions options = new InitOptions();
             options.appId = "240082229369859";
             options.channelUrl = "//limeyhouse.dyndns.org/channel.aspx";
@@ -162,17 +189,18 @@ namespace JSFFScript
                   ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + UserID + "/picture";
               }
           });
-            Facebook.Event.subscribe("auth.authResponseChange", delegate(EventChangeResponse response)
+            Facebook.Event.subscribe("auth.authResponseChange", delegate(LoginResponse response)
             {
                 if (debug) Script.Alert("Event Login Fired");
                 if (response.status == "connected")
                 {
-                    UserID = response.userID;
-                    ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + response.userID + "/picture";
+                    UserID = response.authResponse.userID;
+                    ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + UserID + "/picture";
                 }
                 else
                 {
-                    Script.Alert("Not Logged in ");
+                    ((ImageElement)Document.GetElementById("image")).Src = "";
+                    ClearCanvas();
                 }
             });
         }

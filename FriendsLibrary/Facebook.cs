@@ -89,18 +89,12 @@ namespace FreindsLibrary
     {
         public void subscribe(string eventName, EventChange response) { }
     }
-    public sealed class EventChangeResponse
-    {
-        public string status;
-        public string authResponse;
-        public string userID;
-    }
     public sealed class FriendInfo
     {
         public string id;
         public string name;
     }
-    public delegate void EventChange(EventChangeResponse response);
+    public delegate void EventChange(LoginResponse response);
      
 }
 

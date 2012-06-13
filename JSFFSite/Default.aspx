@@ -20,7 +20,9 @@
     <button id="MyButton" title="Clickme">
         LogIn</button>
     <button id="PostButton" title="Clickme">
-        FriendConnectionCount</button>
+       GraphIt</button>
+       <button id="Iterate" title="Clickme">
+        Iterate</button>
     <button id="LogoutButton" title="Clickme">
         Logout</button>
         <label id="friendName"></label>

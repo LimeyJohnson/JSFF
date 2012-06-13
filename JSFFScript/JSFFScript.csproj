@@ -50,6 +50,8 @@
   <ItemGroup>
     <Content Include="Properties\JSFFScript.ruleset" />
     <Content Include="Properties\JSFFScript.script" />
+    <Compile Include="Class1.cs" />
+    <Compile Include="FriendsGroup.cs" />
     <Compile Include="Friend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FFJS.cs" />
