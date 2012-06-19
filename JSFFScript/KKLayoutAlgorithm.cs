@@ -51,7 +51,7 @@ namespace GraphSharp.Algorithms.Layout.Simple.FDP
         protected void InternalCompute()
         {
             #region Initialization
-            distances = new Array();
+            distances = new Array[];
             edgeLengths = new double[];
             springConstants = new double[VisitedGraph.VertexCount, VisitedGraph.VertexCount];
             vertices = new Friend[VisitedGraph.VertexCount];
