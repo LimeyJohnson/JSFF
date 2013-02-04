@@ -128,7 +128,7 @@ namespace JSFFScript
             {
                 Friend f = (Friend)Friends[(string)friend.connections[x]];
                 f.highlightSecondary();
-                DrawLineBetweenFriends(friend, f);
+               // DrawLineBetweenFriends(friend, f);
             }
             friend.highlightPrimary();
 

@@ -26,14 +26,14 @@ namespace JSFFScript
             double distance = getDistance(target.X, target.Y, actor.X, actor.Y);
             double xUnit = (target.X - actor.X) / distance;
             double yUnit = (target.Y - actor.Y) / distance;
-            Vector result = new Vector();
+            Vector result = new Vector(0,0);
             result.xCord = xUnit / (RepulsionConstant * distance * distance);
             result.yCord = yUnit / (RepulsionConstant * distance * distance);
             return result;
         }
         private Vector AttractForce(Friend target, Friend actor)
         {
-            Vector result = new Vector();
+            Vector result = new Vector(0,0);
             result.xCord = AttractionConstant * (actor.X - target.X);
             result.yCord = AttractionConstant * (actor.Y - target.Y);
             return result;
@@ -54,7 +54,7 @@ namespace JSFFScript
         public void iterateSingle(string id)
         {
             Friend f = (Friend)Friends[id];
-            Vector netForce = new Vector();
+            Vector netForce = new Vector(0,0);
             for (int y = 0; y < Friends.Keys.Length; y++)
             {
                 Friend b = (Friend)Friends[Friends.Keys[y]];
@@ -72,7 +72,6 @@ namespace JSFFScript
     {
         public double xCord;
         public double yCord;
-        public Vector() { }
         public Vector(double X, double Y)
         {
             this.xCord = X;
