@@ -14,7 +14,7 @@
     <CodeAnalysisRuleSet>Properties\FxCop.ruleset</CodeAnalysisRuleSet>
     <GenerateScript>True</GenerateScript>
     <GenerateResources>True</GenerateResources>
-<DeploymentPath>..\JSFFSite\Scripts</DeploymentPath>
+    <DeploymentPath>..\JSFFSite\Scripts</DeploymentPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\Debug\</OutputPath>
@@ -44,16 +44,16 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Script.jQuery">
-      <HintPath>..\..\scriptsharp\bin\Release\Script.jQuery.dll</HintPath>
+      <HintPath>..\packages\ScriptSharp.Lib.jQuery.0.7.6.0\lib\Script.jQuery.dll</HintPath>
     </Reference>
     <Reference Include="Script.Web">
       <HintPath>..\packages\ScriptSharp.Lib.HTML.0.7.5.0\lib\Script.Web.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FriendsLibrary\FriendsLibrary.csproj">
-      <Project>{c41c452a-52dd-4c02-b885-d2976de2ae1f}</Project>
-      <Name>FriendsLibrary</Name>
+    <ProjectReference Include="..\Facebook\Facebook.csproj">
+      <Project>{5827f6ab-594d-42cc-83a3-15504bba61e9}</Project>
+      <Name>Facebook</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

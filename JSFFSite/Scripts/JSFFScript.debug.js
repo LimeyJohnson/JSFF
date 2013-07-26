@@ -38,7 +38,7 @@ JSFFScript._FFJS.buttonClicked = function JSFFScript__FFJS$buttonClicked(e) {
     FB.login(function(response) {
     }, options);
 }
-JSFFScript._FFJS.post = function JSFFScript__FFJS$post(e) {
+JSFFScript._FFJS.graphFriends = function JSFFScript__FFJS$graphFriends(e) {
     /// <param name="e" type="jQueryEvent">
     /// </param>
     JSFFScript._FFJS.clearCanvas();
@@ -172,13 +172,13 @@ JSFFScript._FFJS.iterateSingle = function JSFFScript__FFJS$iterateSingle() {
 JSFFScript._FFJS.onload = function JSFFScript__FFJS$onload() {
     JSFFScript._FFJS.canvas = document.getElementById('tutorial');
     JSFFScript._FFJS.canvasContext = JSFFScript._FFJS.canvas.getContext('2d');
-    $('#MyButton').click(JSFFScript._FFJS.buttonClicked);
-    $('#PostButton').click(JSFFScript._FFJS.post);
+    $('#login').click(JSFFScript._FFJS.buttonClicked);
+    $('#graph').click(JSFFScript._FFJS.graphFriends);
     $('#LogoutButton').click(JSFFScript._FFJS.logOut);
     $('#Iterate').click(JSFFScript._FFJS.iterate);
     var options = {};
-    options.appId = '240082229369859';
-    options.channelUrl = '//limeyhouse.dyndns.org/channel.aspx';
+    options.appId = '459808530803920';
+    options.channelUrl = 'http://localhost/channel.aspx';
     options.status = true;
     options.cookie = true;
     options.xfbml = false;
@@ -230,6 +230,7 @@ JSFFScript.Friend = function JSFFScript_Friend(_response, _canvasContext, _x, _y
     this.name = _response.name;
     this.id = _response.id;
     this._canvasContext = _canvasContext;
+    this.position = new JSFFScript.Point();
     this.position.x = _x;
     this.position.y = _y;
     this.connections = [];

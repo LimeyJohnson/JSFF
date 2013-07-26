@@ -33,7 +33,7 @@ namespace JSFFScript
             options.scope = "email, user_likes, publish_stream";
             Facebook.login(delegate(LoginResponse response) { }, options);
         }
-        public static void Post(jQueryEvent e)
+        public static void GraphFriends(jQueryEvent e)
         {
             ClearCanvas();
             ApiOptions options = new ApiOptions();
@@ -68,7 +68,7 @@ namespace JSFFScript
                     if (debug) Script.Alert(Friends.Count);
                 }
                 );
-              
+
 
             });
             jQuery.Select("#tutorial").MouseMove(new jQueryEventHandler(MouseOverFriend));
@@ -90,7 +90,7 @@ namespace JSFFScript
         public static void LogOut(jQueryEvent e)
         {
             Facebook.logout(delegate() { });
-            
+
 
         }
         public static void CanvasClick(jQueryEvent e)
@@ -100,13 +100,13 @@ namespace JSFFScript
             Friend f = PinPointFriend(e);
             if (Script.IsNullOrUndefined(f)) return;
             SelectFriends(f);
-            
+
         }
         public static void MouseOverFriend(jQueryEvent e)
         {
             Friend f = PinPointFriend(e);
             string text = "";
-            if (!Script.IsNullOrUndefined(f)) text = f.name; 
+            if (!Script.IsNullOrUndefined(f)) text = f.name;
             jQuery.Select("#friendName").Text(text);
         }
         public static Friend PinPointFriend(jQueryEvent e)
@@ -123,12 +123,12 @@ namespace JSFFScript
         }
         public static void SelectFriends(Friend friend)
         {
-            
+
             for (int x = 0; x < friend.connections.Count; x++)
             {
                 Friend f = (Friend)Friends[(string)friend.connections[x]];
                 f.highlightSecondary();
-               // DrawLineBetweenFriends(friend, f);
+                // DrawLineBetweenFriends(friend, f);
             }
             friend.highlightPrimary();
 
@@ -169,14 +169,14 @@ namespace JSFFScript
         public static void Onload()
         {
             canvas = Document.GetElementById("tutorial").As<CanvasElement>();
-             canvasContext = (CanvasContext2D)canvas.GetContext(Rendering.Render2D);
-            jQuery.Select("#MyButton").Click(new jQueryEventHandler(ButtonClicked));
-            jQuery.Select("#PostButton").Click(new jQueryEventHandler(Post));
+            canvasContext = (CanvasContext2D)canvas.GetContext(Rendering.Render2D);
+            jQuery.Select("#login").Click(new jQueryEventHandler(ButtonClicked));
+            jQuery.Select("#graph").Click(new jQueryEventHandler(GraphFriends));
             jQuery.Select("#LogoutButton").Click(new jQueryEventHandler(LogOut));
             jQuery.Select("#Iterate").Click(new jQueryEventHandler(Iterate));
             InitOptions options = new InitOptions();
-            options.appId = "240082229369859";
-            options.channelUrl = "//limeyhouse.dyndns.org/channel.aspx";
+            options.appId = "459808530803920";
+            options.channelUrl = "http://localhost/channel.aspx";
             options.status = true;
             options.cookie = true;
             options.xfbml = false;

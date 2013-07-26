@@ -17,6 +17,7 @@ namespace JSFFScript
             this.name = _response.name;
             this.id = _response.id;
             this.canvasContext = _canvasContext;
+            this.position = new Point();
             this.position.X = _x;
             this.position.Y = _y;
             this.connections = new ArrayList();

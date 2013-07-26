@@ -17,9 +17,9 @@
     </div>
     <div id="fb-root">
     </div>
-    <button id="MyButton" title="Clickme">
+    <button id="login" title="Clickme">
         LogIn</button>
-    <button id="PostButton" title="Clickme">
+    <button id="graph" title="Clickme">
        GraphIt</button>
        <button id="Iterate" title="Clickme">
         Iterate</button>
