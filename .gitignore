@@ -4,3 +4,5 @@ obj
 
 # mstest test results
 TestResults
+JSFFScript.debug.js
+JSFFScript.js
