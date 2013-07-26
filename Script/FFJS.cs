@@ -7,22 +7,16 @@ using System.Html;
 using jQueryApi;
 using System.Collections;
 using FreindsLibrary;
+using D3Wrapper;
 using System.Html.Media.Graphics;
 namespace JSFFScript
 {
 
     internal static class FFJS
     {
-        public static double imagesize = 0;
-        public static double imageOffSet = 10;
-        public static double picsperaxis = 0;
-        public static int iterator = 0;
         public static string UserID;
         public static Dictionary Friends = new Dictionary();
         public static bool debug = false;
-        public static CanvasElement canvas;
-        public static FriendsGroup group;
-        public static CanvasContext2D canvasContext;
         static FFJS()
         {
             jQuery.OnDocumentReady(new Action(Onload));
@@ -35,17 +29,20 @@ namespace JSFFScript
         }
         public static void GraphFriends(jQueryEvent e)
         {
-            ClearCanvas();
+            Array nodes = new Array();
+            Array links = new Array();
             ApiOptions options = new ApiOptions();
             Facebook.api("/me/friends", delegate(ApiResponse apiResponse)
             {
-                CalcPidData(apiResponse.data.Length);
                 for (int x = 0; x < apiResponse.data.Length; x++)
                 {
-                    double xCord = (Math.Floor(x % picsperaxis) * (imagesize + imageOffSet)) + imageOffSet;
-                    double yCord = (Math.Floor(x / picsperaxis) * (imagesize + imageOffSet)) + imageOffSet;
-                    Friend friend = new Friend(apiResponse.data[x], canvasContext, (int)xCord, (int)yCord);
+                    Friend friend = new Friend(apiResponse.data[x], x);
                     Friends[friend.id] = friend;
+                    Node noeNode = new Node();
+                    noeNode.Name = friend.name;
+                    noeNode.Group = 1;
+                    nodes[nodes.Length] = noeNode;
+
                 }
                 Queries q = new Queries();
                 q.friendsLimit = "SELECT uid1, uid2 from friend WHERE uid1 = " + UserID + " ORDER BY uid2";
@@ -56,36 +53,46 @@ namespace JSFFScript
                 queryOptions.method = "fql.multiquery";
                 queryOptions.queries = q;
 
+
                 Facebook.api(queryOptions, delegate(QueryResponse[] queryResponse)
                 {
                     if (debug) Script.Alert(queryResponse[2].fql_result_set.Length);
                     for (int i = 0; i < queryResponse[2].fql_result_set.Length; i++)
                     {
                         MultiQueryResults results = queryResponse[2].fql_result_set[i];
-                        ((Friend)Friends[results.uid1]).connections.Add(results.uid2);
-                        ((Friend)Friends[results.uid2]).connections.Add(results.uid1);
+                        Friend target = ((Friend)Friends[results.uid1]);
+                        Friend origin = ((Friend)Friends[results.uid2]);
+                        Link newLink = new Link();
+                        newLink.Source = origin.index;
+                        newLink.Target = target.index;
+                        newLink.Value = 1;
+                        links[links.Length] = newLink;
                     }
+                    int width = 960;
+                    int height = 500;
+                    ForceObject force = D3.Layout.Force().Charge(-120).LinkDistance(30).Size(new int[] { width, height });
+                    SelectObject svg = D3.Select("#canvas").Append("svg").Attr("width", width).Attr("height", height);
+                    force.Nodes((Node[])nodes).Links((Link[])links).Start();
+                    SelectObject link = svg.SelectAll(".link").Data((Link[])links).Enter().Append("line").Attr("class", "link").Style("stroke-width", delegate(Dictionary d) { return Math.Sqrt((int)d["value"]); });
+                    SelectObject node = svg.SelectAll(".node").Data((Node[])nodes).Enter().Append("circle").Attr("class", "node").Attr("r", 5).Call(force.Drag);
+                    node.Append("title").Text(delegate(Dictionary D) { return (string)D["name"]; });
+                    force.On("tick", delegate()
+                    {
+                        link.Attr("x1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["x"]; }).
+                            Attr("y1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["y"]; }).
+                            Attr("x2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["x"]; }).
+                            Attr("y1", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["y"]; });
+                        node.Attr("cx", delegate(Dictionary D) { return (int)D["x"]; }).
+                            Attr("cy", delegate(Dictionary D) { return (int)D["y"]; });
+                       
+
+                    });
                     if (debug) Script.Alert(Friends.Count);
                 }
                 );
 
 
             });
-            jQuery.Select("#tutorial").MouseMove(new jQueryEventHandler(MouseOverFriend));
-            jQuery.Select("#tutorial").Click(new jQueryEventHandler(CanvasClick));
-        }
-        public static void CalcPidData(int friendsCount)
-        {
-            int totalLenght = canvas.Width;
-            picsperaxis = Math.Ceil(Math.Sqrt(friendsCount));
-            imagesize = ((totalLenght - imageOffSet) / picsperaxis) - imageOffSet;
-        }
-        public static void ClearCanvas()
-        {
-            canvasContext.Save();
-            canvasContext.SetTransform(1, 0, 0, 1, 0, 0);
-            canvasContext.ClearRect(0, 0, canvas.Width, canvas.Height);
-            canvasContext.Restore();
         }
         public static void LogOut(jQueryEvent e)
         {
@@ -93,87 +100,11 @@ namespace JSFFScript
 
 
         }
-        public static void CanvasClick(jQueryEvent e)
-        {
-            ClearCanvas();
-            DrawFriends();
-            Friend f = PinPointFriend(e);
-            if (Script.IsNullOrUndefined(f)) return;
-            SelectFriends(f);
-
-        }
-        public static void MouseOverFriend(jQueryEvent e)
-        {
-            Friend f = PinPointFriend(e);
-            string text = "";
-            if (!Script.IsNullOrUndefined(f)) text = f.name;
-            jQuery.Select("#friendName").Text(text);
-        }
-        public static Friend PinPointFriend(jQueryEvent e)
-        {
-            for (int x = 0; x < Friends.Keys.Length; x++)
-            {
-                Friend f = (Friend)Friends[Friends.Keys[x]];
-                if (f.X < e.OffsetX && (f.X + imagesize) > e.OffsetX && f.Y < e.OffsetY && (f.Y + imagesize) > e.OffsetY)
-                {
-                    return f;
-                }
-            }
-            return null;
-        }
-        public static void SelectFriends(Friend friend)
-        {
-
-            for (int x = 0; x < friend.connections.Count; x++)
-            {
-                Friend f = (Friend)Friends[(string)friend.connections[x]];
-                f.highlightSecondary();
-                // DrawLineBetweenFriends(friend, f);
-            }
-            friend.highlightPrimary();
-
-        }
-        public static void DrawLineBetweenFriends(Friend f1, Friend f2)
-        {
-            canvasContext.BeginPath();
-            canvasContext.MoveTo(f1.X, f1.Y);
-            canvasContext.LineTo(f2.X, f2.Y);
-            canvasContext.ClosePath();
-            canvasContext.Stroke();
-        }
-        public static void DrawFriends()
-        {
-            for (int x = 0; x < Friends.Keys.Length; x++)
-            {
-                Friend friend = (Friend)Friends[Friends.Keys[x]];
-                friend.drawImage();
-            }
-        }
-        public static void Iterate(jQueryEvent e)
-        {
-            group = new FriendsGroup(Friends);
-            //group.iterate();
-            //ClearCanvas();
-            //DrawFriends();
-            IterateSingle();
-        }
-        public static void IterateSingle()
-        {
-            string uid = Friends.Keys[iterator % Friends.Keys.Length];
-            group.iterateSingle(uid);
-            ClearCanvas();
-            DrawFriends();
-            iterator++;
-            if (iterator < 1000) Window.SetTimeout(IterateSingle, 50);
-        }
         public static void Onload()
         {
-            canvas = Document.GetElementById("tutorial").As<CanvasElement>();
-            canvasContext = (CanvasContext2D)canvas.GetContext(Rendering.Render2D);
             jQuery.Select("#login").Click(new jQueryEventHandler(ButtonClicked));
             jQuery.Select("#graph").Click(new jQueryEventHandler(GraphFriends));
             jQuery.Select("#LogoutButton").Click(new jQueryEventHandler(LogOut));
-            jQuery.Select("#Iterate").Click(new jQueryEventHandler(Iterate));
             InitOptions options = new InitOptions();
             options.appId = "459808530803920";
             options.channelUrl = "http://localhost/channel.aspx";
@@ -200,7 +131,6 @@ namespace JSFFScript
                 else
                 {
                     ((ImageElement)Document.GetElementById("image")).Src = "";
-                    ClearCanvas();
                 }
             });
         }

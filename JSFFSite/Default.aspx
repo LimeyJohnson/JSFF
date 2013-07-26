@@ -6,12 +6,25 @@
     <title>Friends Graph</title>
 </head>
 <body>
-   
+   <style>
+
+.node {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.link {
+  stroke: #999;
+  stroke-opacity: .6;
+}
+
+</style>
     
     <script type="text/javascript" src="//connect.facebook.net/en_US/all.js"></script>
      <script type="text/javascript" src="Scripts/jquery-1.4.1.js"></script>
     <script type="text/javascript" src="Scripts/mscorlib.js"></script>
     <script type="text/javascript" src="Scripts/JSFFScript.debug.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <img id="image" alt="Profile Pic" width="100", height="100" />
     <div class="fb-login-button">
     </div>
@@ -28,8 +41,7 @@
         <label id="friendName"></label>
     <div id="resultsDiv">
     </div>
-    <canvas id="tutorial" width="800" height="800">
-    </canvas>
+    <div id="canvas"></div>
     <div id="images">
     </div>
     <form id="form1" runat="server">
