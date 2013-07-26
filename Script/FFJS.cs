@@ -81,7 +81,7 @@ namespace JSFFScript
                         link.Attr("x1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["x"]; }).
                             Attr("y1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["y"]; }).
                             Attr("x2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["x"]; }).
-                            Attr("y1", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["y"]; });
+                            Attr("y2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["y"]; });
                         node.Attr("cx", delegate(Dictionary D) { return (int)D["x"]; }).
                             Attr("cy", delegate(Dictionary D) { return (int)D["y"]; });
                        

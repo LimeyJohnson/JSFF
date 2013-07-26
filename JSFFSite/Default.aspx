@@ -42,9 +42,5 @@
     <div id="resultsDiv">
     </div>
     <div id="canvas"></div>
-    <div id="images">
-    </div>
-    <form id="form1" runat="server">
-    </form>
-</body>
+    </body>
 </html>
