@@ -5,16 +5,16 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{83A0CEE8-DC26-4341-AE32-48EEA6A8DA97}</ProjectGuid>
+    <ProjectGuid>{46EC336C-F3B2-4FF2-BF68-AEC1EFC3EB94}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Script</RootNamespace>
-    <AssemblyName>Script</AssemblyName>
+    <RootNamespace>JSFFScript</RootNamespace>
+    <AssemblyName>JSFFScript</AssemblyName>
+    <ScriptTemplate>Properties\Script.template</ScriptTemplate>
     <CodeAnalysisRuleSet>Properties\FxCop.ruleset</CodeAnalysisRuleSet>
     <GenerateScript>True</GenerateScript>
     <GenerateResources>True</GenerateResources>
-    <MinimizeScript>True</MinimizeScript>
-    <CopyReferences>True</CopyReferences>
+    <DeploymentPath>..\JSFFSite\Scripts</DeploymentPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\Debug\</OutputPath>
@@ -22,7 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0028, 1591, 1684</NoWarn>
-    <DocumentationFile>bin\Debug\Script.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\JSFFScript.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -30,30 +30,30 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0028, 1591, 1684</NoWarn>
-    <DocumentationFile>bin\Release\Script.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\JSFFScript.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Properties\FxCop.ruleset" />
+    <None Include="Properties\Script.template" />
     <Compile Include="FFJS.cs" />
     <Compile Include="Friend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Script.D3">
-      <HintPath>..\..\scriptsharp\bin\Release\Script.D3.dll</HintPath>
-    </Reference>
-    <Reference Include="Script.Facebook">
-      <HintPath>..\..\scriptsharp\bin\Release\Script.Facebook.dll</HintPath>
-    </Reference>
     <Reference Include="Script.jQuery">
-      <HintPath>..\packages\ScriptSharp.Lib.jQuery.0.8\lib\Script.jQuery.dll</HintPath>
+      <HintPath>..\packages\ScriptSharp.Lib.jQuery.0.7.6.0\lib\Script.jQuery.dll</HintPath>
     </Reference>
     <Reference Include="Script.Web">
-      <HintPath>..\packages\ScriptSharp.Lib.HTML.0.8\lib\Script.Web.dll</HintPath>
+      <HintPath>..\packages\ScriptSharp.Lib.HTML.0.7.5.0\lib\Script.Web.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Facebook\D3js.csproj">
+      <Project>{5827f6ab-594d-42cc-83a3-15504bba61e9}</Project>
+      <Name>D3js</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\ScriptSharp.0.8\tools\ScriptSharp.targets" Condition="Exists('..\packages\ScriptSharp.0.8\tools\ScriptSharp.targets')" />
-  <Import Project="..\packages\ScriptSharp.Runtime.0.8\tools\ScriptSharpWeb.targets" Condition="Exists('..\packages\ScriptSharp.Runtime.0.8\tools\ScriptSharpWeb.targets')" />
+  <Import Project="..\packages\ScriptSharp.0.7.5.1\tools\ScriptSharp.targets" Condition="Exists('..\packages\ScriptSharp.0.7.5.1\tools\ScriptSharp.targets')" />
 </Project>
