@@ -4,7 +4,7 @@
 
 "use strict";
 
-require(['ss', 'D3', 'Facebook', 'jquery'], function(ss, D3, Facebook, $) {
+require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
   var $global = this;
 
   // JSFFScript.FFJS
@@ -25,7 +25,7 @@ require(['ss', 'D3', 'Facebook', 'jquery'], function(ss, D3, Facebook, $) {
       for (var x = 0; x < (apiResponse.data).length; x++) {
         var friend = new Friend((apiResponse.data)[x], x);
         FFJS.friends[friend.id] = friend;
-        var noeNode = new Node();
+        var noeNode = {};
         noeNode.name = friend.name;
         noeNode.group = 1;
         nodes[nodes.length] = noeNode;
@@ -42,7 +42,7 @@ require(['ss', 'D3', 'Facebook', 'jquery'], function(ss, D3, Facebook, $) {
           var results = queryResponse[2].fql_result_set[i];
           var target = (FFJS.friends[results.uid1]);
           var origin = (FFJS.friends[results.uid2]);
-          var newLink = new Link();
+          var newLink = {};
           newLink.source = origin.index;
           newLink.target = target.index;
           newLink.value = 1;

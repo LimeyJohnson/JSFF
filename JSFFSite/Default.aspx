@@ -24,16 +24,20 @@
         require.config({
             baseUrl: '/scripts',
             paths: {
-                D3: "http://d3js.org/d3.v3.min",
+                d3: "http://d3js.org/d3.v3.min",
                 Facebook: "//connect.facebook.net/en_US/all"
             },
             shim: {
-                D3: {
+                d3: {
                     exports: "d3",
                 },
                 Facebook: {
                     exports: "FB"
+                },
+                jquery: {
+                    exports:"$"
                 }
+                
             }
 
         });
