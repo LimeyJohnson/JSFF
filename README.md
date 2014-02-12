@@ -1,2 +1,2 @@
-http://jsff.azurewebsites.net/
+JSFF
 ====

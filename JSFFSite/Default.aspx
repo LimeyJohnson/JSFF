@@ -19,26 +19,12 @@
 }
 
 </style>
-    <script src="Scripts/require.js"></script>
-    <script type="text/javascript">
-        require.config({
-            baseUrl: '/scripts',
-            paths: {
-                D3: "http://d3js.org/d3.v3.min",
-                Facebook: "//connect.facebook.net/en_US/all"
-            },
-            shim: {
-                D3: {
-                    exports: "d3",
-                },
-                Facebook: {
-                    exports: "FB"
-                }
-            }
-
-        });
-    </script>
-    <script src="Scripts/Script.js"></script>
+    
+    <script type="text/javascript" src="//connect.facebook.net/en_US/all.js"></script>
+     <script type="text/javascript" src="Scripts/jquery-1.4.1.js"></script>
+    <script type="text/javascript" src="Scripts/mscorlib.js"></script>
+    <script type="text/javascript" src="Scripts/JSFFScript.debug.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <img id="image" alt="Profile Pic" width="100", height="100" />
     <div class="fb-login-button">
     </div>

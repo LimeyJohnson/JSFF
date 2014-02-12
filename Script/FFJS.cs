@@ -7,7 +7,7 @@ using System.Html;
 using jQueryApi;
 using System.Collections;
 using FreindsLibrary;
-using D3Api;
+using D3Wrapper;
 using System.Html.Media.Graphics;
 namespace JSFFScript
 {
@@ -34,9 +34,9 @@ namespace JSFFScript
             ApiOptions options = new ApiOptions();
             Facebook.api("/me/friends", delegate(ApiResponse apiResponse)
             {
-                for (int x = 0; x < ((FriendInfo [])apiResponse.data).Length; x++)
+                for (int x = 0; x < apiResponse.data.Length; x++)
                 {
-                    Friend friend = new Friend(((FriendInfo [])apiResponse.data)[x], x);
+                    Friend friend = new Friend(apiResponse.data[x], x);
                     Friends[friend.id] = friend;
                     Node noeNode = new Node();
                     noeNode.Name = friend.name;
@@ -56,6 +56,7 @@ namespace JSFFScript
 
                 Facebook.api(queryOptions, delegate(QueryResponse[] queryResponse)
                 {
+                    if (debug) Script.Alert(queryResponse[2].fql_result_set.Length);
                     for (int i = 0; i < queryResponse[2].fql_result_set.Length; i++)
                     {
                         MultiQueryResults results = queryResponse[2].fql_result_set[i];
@@ -86,6 +87,7 @@ namespace JSFFScript
                        
 
                     });
+                    if (debug) Script.Alert(Friends.Count);
                 }
                 );
 
@@ -94,7 +96,7 @@ namespace JSFFScript
         }
         public static void LogOut(jQueryEvent e)
         {
-            Facebook.logout(delegate(LoginResponse response) { });
+            Facebook.logout(delegate() { });
 
 
         }
@@ -120,6 +122,7 @@ namespace JSFFScript
           });
             Facebook.Event.subscribe("auth.authResponseChange", delegate(LoginResponse response)
             {
+                if (debug) Script.Alert("Event Login Fired");
                 if (response.status == "connected")
                 {
                     UserID = response.authResponse.userID;

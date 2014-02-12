@@ -14,7 +14,7 @@ namespace JSFFScript
     {
         public Friend(FriendInfo _response, int _index)
         {
-            this.name = _response.first_name + _response.last_name;
+            this.name = _response.name;
             this.id = _response.id;
             this.index = _index;
         }
