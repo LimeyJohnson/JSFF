@@ -28,6 +28,7 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
         var noeNode = {};
         noeNode.name = friend.name;
         noeNode.group = 1;
+        noeNode.id = friend.id;
         nodes[nodes.length] = noeNode;
       }
       var q = {};
@@ -56,7 +57,9 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
         var link = svg.selectAll('.link').data(links).enter().append('line').attr('class', 'link').style('stroke-width', function(d) {
           return Math.sqrt(d['value']);
         });
-        var node = svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 5).call(force.drag);
+        var node = svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 5).call(force.drag).on('click', function(d) {
+          FFJS.selectedID = (d['id'] === FFJS.selectedID) ? null : d['id'];
+        });
         node.append('title').text(function(D) {
           return D['name'];
         });
@@ -69,6 +72,13 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
             return (D['target'])['x'];
           }).attr('y2', function(D) {
             return (D['target'])['y'];
+          }).style('stroke-width', function(D) {
+            if (!!FFJS.selectedID && FFJS.matchesTargetOrSource(D, FFJS.selectedID)) {
+              return 2;
+            }
+            else {
+              return 1;
+            }
           });
           node.attr('cx', function(D) {
             return D['x'];
@@ -78,6 +88,9 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
         });
       });
     });
+  };
+  FFJS.matchesTargetOrSource = function(d, id) {
+    return (d['source'])['id'] === id || (d['target'])['id'] === id;
   };
   FFJS.logOut = function(e) {
     FB.logout(function(response) {
@@ -116,7 +129,7 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
 
   function Friend(_response, _index) {
     this.index = 0;
-    this.name = _response.first_name + _response.last_name;
+    this.name = _response.name;
     this.id = _response.id;
     this.index = _index;
   }
@@ -134,7 +147,7 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
     });
 
   FFJS.friends = {};
-  FFJS.debug = false;
+  FFJS.selectedID = null;
   $(FFJS.onload);
 
 });

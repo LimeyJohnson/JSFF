@@ -106,6 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <None Include="Properties\PublishProfiles\JSFF %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\JSFF.pubxml" />
   </ItemGroup>
   <ItemGroup>

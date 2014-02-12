@@ -16,7 +16,7 @@ namespace JSFFScript
     {
         public static string UserID;
         public static Dictionary Friends = new Dictionary();
-        public static bool debug = false;
+        public static string SelectedID = null;
         static FFJS()
         {
             jQuery.OnDocumentReady(new Action(Onload));
@@ -34,13 +34,14 @@ namespace JSFFScript
             ApiOptions options = new ApiOptions();
             Facebook.api("/me/friends", delegate(ApiResponse apiResponse)
             {
-                for (int x = 0; x < ((FriendInfo [])apiResponse.data).Length; x++)
+                for (int x = 0; x < ((FriendInfo[])apiResponse.data).Length; x++)
                 {
-                    Friend friend = new Friend(((FriendInfo [])apiResponse.data)[x], x);
+                    Friend friend = new Friend(((FriendInfo[])apiResponse.data)[x], x);
                     Friends[friend.id] = friend;
                     Node noeNode = new Node();
                     noeNode.Name = friend.name;
                     noeNode.Group = 1;
+                    noeNode.ID = friend.id;
                     nodes[nodes.Length] = noeNode;
 
                 }
@@ -73,24 +74,46 @@ namespace JSFFScript
                     SelectObject svg = D3.Select("#canvas").Append("svg").Attr("width", width).Attr("height", height);
                     force.Nodes((Node[])nodes).Links((Link[])links).Start();
                     SelectObject link = svg.SelectAll(".link").Data((Link[])links).Enter().Append("line").Attr("class", "link").Style("stroke-width", delegate(Dictionary d) { return Math.Sqrt((int)d["value"]); });
-                    SelectObject node = svg.SelectAll(".node").Data((Node[])nodes).Enter().Append("circle").Attr("class", "node").Attr("r", 5).Call(force.Drag);
+                    SelectObject node = svg.SelectAll(".node").Data((Node[])nodes).Enter().Append("circle").Attr("class", "node").Attr("r", 5).Call(force.Drag)
+                        .On("click", delegate(Dictionary d) 
+                        {
+                            SelectedID = (string)d["id"] == SelectedID? null: (string)d["id"];
+                        });
+                        
                     node.Append("title").Text(delegate(Dictionary D) { return (string)D["name"]; });
                     force.On("tick", delegate()
                     {
                         link.Attr("x1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["x"]; }).
                             Attr("y1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["y"]; }).
                             Attr("x2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["x"]; }).
-                            Attr("y2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["y"]; });
+                            Attr("y2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["y"]; }).
+                            Style("stroke-width", delegate(Dictionary D)
+                            {
+                                if(Script.Boolean(SelectedID) && MatchesTargetOrSource(D, SelectedID))
+                                {
+                                    return 2;
+                                }
+                                else
+                                {
+                                    return 1;
+                                }
+                            });
+
+
                         node.Attr("cx", delegate(Dictionary D) { return (int)D["x"]; }).
                             Attr("cy", delegate(Dictionary D) { return (int)D["y"]; });
-                       
-
                     });
+                    
                 }
                 );
 
 
             });
+        }
+        public static bool MatchesTargetOrSource(Dictionary d, string id)
+        {
+            return ((Dictionary)d["source"])["id"] == id ||
+                ((Dictionary)d["target"])["id"] == id;
         }
         public static void LogOut(jQueryEvent e)
         {
