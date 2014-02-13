@@ -17,11 +17,13 @@ namespace JSFFScript
             this.name = _response.name;
             this.id = _response.id;
             this.index = _index;
+            this.links = new ArrayList();
         }
        
         public string name;
         public string id;
         public int index;
+        public ArrayList links;
     }
    
 

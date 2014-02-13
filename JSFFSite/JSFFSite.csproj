@@ -70,6 +70,7 @@
     <Content Include="Scripts\ss.min.js" />
     <Content Include="Scripts\ssloader.js" />
     <Content Include="Scripts\ssloader.min.js" />
+    <Content Include="Styles\JSFFStyle.css" />
     <Content Include="Styles\Site.css" />
     <Content Include="Scripts\jquery.js" />
     <Content Include="Web.config" />

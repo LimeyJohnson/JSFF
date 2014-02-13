@@ -46,8 +46,9 @@
     <Reference Include="Script.Facebook">
       <HintPath>..\..\scriptsharp\bin\Release\Script.Facebook.dll</HintPath>
     </Reference>
-    <Reference Include="Script.jQuery">
-      <HintPath>..\packages\ScriptSharp.Lib.jQuery.0.8\lib\Script.jQuery.dll</HintPath>
+    <Reference Include="Script.jQuery, Version=0.8.0.0, Culture=neutral, PublicKeyToken=8fc0e3af5abcb6c4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\scriptsharp\bin\Release\Script.jQuery.dll</HintPath>
     </Reference>
     <Reference Include="Script.Web">
       <HintPath>..\packages\ScriptSharp.Lib.HTML.0.8\lib\Script.Web.dll</HintPath>

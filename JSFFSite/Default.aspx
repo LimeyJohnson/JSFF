@@ -6,19 +6,7 @@
     <title>Friends Graph</title>
 </head>
 <body>
-   <style>
-
-.node {
-  stroke: #fff;
-  stroke-width: 1.5px;
-}
-
-.link {
-  stroke: #999;
-  stroke-opacity: .6;
-}
-
-</style>
+    <link href="Styles/JSFFStyle.css" rel="stylesheet" />
     <script src="Scripts/require.js"></script>
     <script type="text/javascript">
         require.config({
@@ -35,15 +23,14 @@
                     exports: "FB"
                 },
                 jquery: {
-                    exports:"$"
+                    exports: "$"
                 }
-                
+
             }
 
         });
     </script>
     <script src="Scripts/Script.js"></script>
-    <img id="image" alt="Profile Pic" width="100", height="100" />
     <div class="fb-login-button">
     </div>
     <div id="fb-root">
@@ -51,14 +38,8 @@
     <button id="login" title="Clickme">
         LogIn</button>
     <button id="graph" title="Clickme">
-       GraphIt</button>
-       <button id="Iterate" title="Clickme">
-        Iterate</button>
-    <button id="LogoutButton" title="Clickme">
-        Logout</button>
-        <label id="friendName"></label>
-    <div id="resultsDiv">
-    </div>
+        GraphIt</button>
     <div id="canvas"></div>
-    </body>
+    <div id="callout"></div>
+</body>
 </html>

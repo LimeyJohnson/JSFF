@@ -43,6 +43,8 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
           var results = queryResponse[2].fql_result_set[i];
           var target = (FFJS.friends[results.uid1]);
           var origin = (FFJS.friends[results.uid2]);
+          origin.links.push(target.id);
+          target.links.push(origin.id);
           var newLink = {};
           newLink.source = origin.index;
           newLink.target = target.index;
@@ -51,43 +53,76 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
         }
         var width = 960;
         var height = 500;
+        FFJS.zoom = d3.behavior.zoom().scaleExtent([ -100, 100 ]).on('zoom', FFJS._zoomed);
         var force = d3.layout.force().charge(-120).linkDistance(30).size([ width, height ]);
-        var svg = d3.select('#canvas').append('svg').attr('width', width).attr('height', height);
+        FFJS.SVG = d3.select('#canvas').append('svg').attr('width', width).attr('height', height).call(FFJS.zoom).append('g');
         force.nodes(nodes).links(links).start();
-        var link = svg.selectAll('.link').data(links).enter().append('line').attr('class', 'link').style('stroke-width', function(d) {
+        FFJS.links = FFJS.SVG.selectAll('.link').data(links).enter().append('line').attr('class', 'link').style('stroke-width', function(d) {
           return Math.sqrt(d['value']);
         });
-        var node = svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 5).call(force.drag).on('click', function(d) {
-          FFJS.selectedID = (d['id'] === FFJS.selectedID) ? null : d['id'];
-        });
-        node.append('title').text(function(D) {
+        FFJS.nodes = FFJS.SVG.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 7).call(force.drag).on('mousemove', FFJS.onMouseMove).on('mouseover', FFJS.onMouseOver).on('mouseout', FFJS.onMouseOut);
+        FFJS.nodes.append('title').text(function(D) {
           return D['name'];
         });
-        force.on('tick', function() {
-          link.attr('x1', function(D) {
-            return (D['source'])['x'];
-          }).attr('y1', function(D) {
-            return (D['source'])['y'];
-          }).attr('x2', function(D) {
-            return (D['target'])['x'];
-          }).attr('y2', function(D) {
-            return (D['target'])['y'];
-          }).style('stroke-width', function(D) {
-            if (!!FFJS.selectedID && FFJS.matchesTargetOrSource(D, FFJS.selectedID)) {
-              return 2;
-            }
-            else {
-              return 1;
-            }
-          });
-          node.attr('cx', function(D) {
-            return D['x'];
-          }).attr('cy', function(D) {
-            return D['y'];
-          });
-        });
+        force.on('tick', FFJS.update);
       });
     });
+  };
+  FFJS._zoomed = function(arg) {
+    FFJS.SVG.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
+  };
+  FFJS.update = function() {
+    FFJS.links.attr('x1', function(D) {
+      return (D['source'])['x'];
+    }).attr('y1', function(D) {
+      return (D['source'])['y'];
+    }).attr('x2', function(D) {
+      return (D['target'])['x'];
+    }).attr('y2', function(D) {
+      return (D['target'])['y'];
+    }).style('stroke-width', function(D) {
+      if (!!FFJS.selectedID && FFJS.matchesTargetOrSource(D, FFJS.selectedID)) {
+        return 2;
+      }
+      else {
+        return 1;
+      }
+    });
+    FFJS.nodes.attr('cx', function(D) {
+      return D['x'];
+    }).attr('cy', function(D) {
+      return D['y'];
+    }).attr('fill', function(D) {
+      if (!!!FFJS.selectedID) {
+        return 'black';
+      }
+      if (((FFJS.friends[FFJS.selectedID]).links.indexOf(D['id']) >= 0)) {
+        return 'red';
+      }
+      return (D['id'] === FFJS.selectedID) ? 'green' : 'black';
+    });
+  };
+  FFJS.onMouseMove = function(d) {
+    d3.event.stopPropagation();
+    var callout = $('#callout');
+    callout.css('left', d['x'] + 20);
+    callout.css('top', d['y'] + 50);
+  };
+  FFJS.onMouseOver = function(d) {
+    d3.event.stopPropagation();
+    FFJS.selectedID = d['id'];
+    FFJS.update();
+    var callout = $('#callout');
+    callout.show();
+    var template = "<p><img src='http://graph.facebook.com/{0}/picture' alt='{1}' height='100' width='100'></p><p>{1}</p>";
+    callout.html(ss.format(template, d['id'], d['name']));
+  };
+  FFJS.onMouseOut = function(d) {
+    d3.event.stopPropagation();
+    FFJS.selectedID = null;
+    FFJS.update();
+    var callout = $('#callout');
+    callout.hide();
   };
   FFJS.matchesTargetOrSource = function(d, id) {
     return (d['source'])['id'] === id || (d['target'])['id'] === id;
@@ -99,10 +134,9 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
   FFJS.onload = function() {
     $('#login').click(FFJS.buttonClicked);
     $('#graph').click(FFJS.graphFriends);
-    $('#LogoutButton').click(FFJS.logOut);
     var options = {};
     options.appId = '459808530803920';
-    options.channelUrl = 'http://localhost/channel.aspx';
+    options.channelUrl = 'http://jsff.asurewebsites.com/channel.aspx';
     options.status = true;
     options.cookie = true;
     options.xfbml = false;
@@ -110,16 +144,13 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
     FB.getLoginStatus(function(loginResponse) {
       if (loginResponse.status === 'connected') {
         FFJS.userID = loginResponse.authResponse.userID;
-        (document.getElementById('image')).src = 'http://graph.facebook.com/' + FFJS.userID + '/picture';
       }
     });
     FB.Event.subscribe('auth.authResponseChange', function(response) {
       if (response.status === 'connected') {
         FFJS.userID = response.authResponse.userID;
-        (document.getElementById('image')).src = 'http://graph.facebook.com/' + FFJS.userID + '/picture';
       }
       else {
-        (document.getElementById('image')).src = '';
       }
     });
   };
@@ -132,6 +163,7 @@ require(['ss', 'd3', 'Facebook', 'jquery'], function(ss, d3, Facebook, $) {
     this.name = _response.name;
     this.id = _response.id;
     this.index = _index;
+    this.links = [];
   }
   var Friend$ = {
 

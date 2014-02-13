@@ -1,9 +1,7 @@
-// Class1.cs
+// FFJS.cs
 //
-
 using System;
 using System.Html;
-
 using jQueryApi;
 using System.Collections;
 using FreindsLibrary;
@@ -17,6 +15,10 @@ namespace JSFFScript
         public static string UserID;
         public static Dictionary Friends = new Dictionary();
         public static string SelectedID = null;
+        public static SelectObject Links;
+        public static SelectObject Nodes;
+        public static BehaviorObject Zoom;
+        public static SelectObject SVG;
         static FFJS()
         {
             jQuery.OnDocumentReady(new Action(Onload));
@@ -62,6 +64,8 @@ namespace JSFFScript
                         MultiQueryResults results = queryResponse[2].fql_result_set[i];
                         Friend target = ((Friend)Friends[results.uid1]);
                         Friend origin = ((Friend)Friends[results.uid2]);
+                        origin.links.Add(target.id);
+                        target.links.Add(origin.id);
                         Link newLink = new Link();
                         newLink.Source = origin.index;
                         newLink.Target = target.index;
@@ -70,45 +74,83 @@ namespace JSFFScript
                     }
                     int width = 960;
                     int height = 500;
+
+                    Zoom = D3.Behavior.Zoom().ScaleExtent(new int[] {-100,100}).On("zoom", Zoomed);
+
                     ForceObject force = D3.Layout.Force().Charge(-120).LinkDistance(30).Size(new int[] { width, height });
-                    SelectObject svg = D3.Select("#canvas").Append("svg").Attr("width", width).Attr("height", height);
+                    SVG = D3.Select("#canvas").Append("svg").Attr("width", width).Attr("height", height).Call(Zoom).Append("g");
                     force.Nodes((Node[])nodes).Links((Link[])links).Start();
-                    SelectObject link = svg.SelectAll(".link").Data((Link[])links).Enter().Append("line").Attr("class", "link").Style("stroke-width", delegate(Dictionary d) { return Math.Sqrt((int)d["value"]); });
-                    SelectObject node = svg.SelectAll(".node").Data((Node[])nodes).Enter().Append("circle").Attr("class", "node").Attr("r", 5).Call(force.Drag)
-                        .On("click", delegate(Dictionary d) 
-                        {
-                            SelectedID = (string)d["id"] == SelectedID? null: (string)d["id"];
-                        });
-                        
-                    node.Append("title").Text(delegate(Dictionary D) { return (string)D["name"]; });
-                    force.On("tick", delegate()
-                    {
-                        link.Attr("x1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["x"]; }).
-                            Attr("y1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["y"]; }).
-                            Attr("x2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["x"]; }).
-                            Attr("y2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["y"]; }).
-                            Style("stroke-width", delegate(Dictionary D)
-                            {
-                                if(Script.Boolean(SelectedID) && MatchesTargetOrSource(D, SelectedID))
-                                {
-                                    return 2;
-                                }
-                                else
-                                {
-                                    return 1;
-                                }
-                            });
+                    Links = SVG.SelectAll(".link").Data((Link[])links).Enter().Append("line").Attr("class", "link").Style("stroke-width", delegate(Dictionary d) { return Math.Sqrt((int)d["value"]); });
+                    Nodes = SVG.SelectAll(".node").Data((Node[])nodes).Enter().Append("circle").Attr("class", "node").Attr("r", 7).Call(force.Drag)
+                        .On("mousemove", onMouseMove)
+                        .On("mouseover", onMouseOver)
+                        .On("mouseout", onMouseOut);
 
-
-                        node.Attr("cx", delegate(Dictionary D) { return (int)D["x"]; }).
-                            Attr("cy", delegate(Dictionary D) { return (int)D["y"]; });
-                    });
+                    Nodes.Append("title").Text(delegate(Dictionary D) { return (string)D["name"]; });
+                    force.On("tick", Update);
                     
                 }
                 );
-
-
             });
+        }
+
+        private static void Zoomed(Dictionary arg)
+        {
+            SVG.Attr("transform", "translate(" + D3.Event.Translate + ")scale(" + D3.Event.Scale + ")");
+        }
+        public static void Update()
+        {
+            Links.Attr("x1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["x"]; }).
+                Attr("y1", delegate(Dictionary D) { return (int)((Dictionary)D["source"])["y"]; }).
+                Attr("x2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["x"]; }).
+                Attr("y2", delegate(Dictionary D) { return (int)((Dictionary)D["target"])["y"]; }).
+                Style("stroke-width", delegate(Dictionary D)
+                {
+                    if (Script.Boolean(SelectedID) && MatchesTargetOrSource(D, SelectedID))
+                    {
+                        return 2;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                });
+            Nodes.Attr("cx", delegate(Dictionary D) { return (int)D["x"]; }).
+                           Attr("cy", delegate(Dictionary D) { return (int)D["y"]; }).
+                           Attr("fill", delegate(Dictionary D)
+                           {
+                               if(!Script.Boolean(SelectedID)) return "black";
+                               if(((Friend)Friends[SelectedID]).links.Contains(D["id"]))
+                               {
+                                   return "red";
+                               }
+                               return D["id"] == SelectedID ? "green" : "black";
+                           });
+        }
+        public static void onMouseMove(Dictionary d)
+        {
+            D3.Event.StopPropagation();
+            jQueryObject callout = jQuery.Select("#callout");
+            callout.CSS("left", (int)d["x"] + 20);
+            callout.CSS("top", (int)d["y"] + 50);
+        }
+        public static void onMouseOver(Dictionary d)
+        {
+            D3.Event.StopPropagation();
+            SelectedID = (string)d["id"];
+            Update();
+            jQueryObject callout = jQuery.Select("#callout");
+            callout.Show();
+            string template = "<p><img src='http://graph.facebook.com/{0}/picture' alt='{1}' height='100' width='100'></p><p>{1}</p>";
+            callout.Html(string.Format(template, d["id"], d["name"]));
+        }
+        public static void onMouseOut(Dictionary d)
+        {
+            D3.Event.StopPropagation();
+            SelectedID = null;
+            Update();
+            jQueryObject callout = jQuery.Select("#callout");
+            callout.Hide();
         }
         public static bool MatchesTargetOrSource(Dictionary d, string id)
         {
@@ -118,39 +160,33 @@ namespace JSFFScript
         public static void LogOut(jQueryEvent e)
         {
             Facebook.logout(delegate(LoginResponse response) { });
-
-
         }
         public static void Onload()
         {
             jQuery.Select("#login").Click(new jQueryEventHandler(ButtonClicked));
             jQuery.Select("#graph").Click(new jQueryEventHandler(GraphFriends));
-            jQuery.Select("#LogoutButton").Click(new jQueryEventHandler(LogOut));
             InitOptions options = new InitOptions();
             options.appId = "459808530803920";
-            options.channelUrl = "http://localhost/channel.aspx";
+            options.channelUrl = "http://jsff.asurewebsites.com/channel.aspx";
             options.status = true;
             options.cookie = true;
             options.xfbml = false;
             Facebook.init(options);
             Facebook.getLoginStatus(delegate(LoginResponse loginResponse)
-          {
-              if (loginResponse.status == "connected")
-              {
-                  UserID = loginResponse.authResponse.userID;
-                  ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + UserID + "/picture";
-              }
-          });
+            {
+                if (loginResponse.status == "connected")
+                {
+                    UserID = loginResponse.authResponse.userID;
+                }
+            });
             Facebook.Event.subscribe("auth.authResponseChange", delegate(LoginResponse response)
             {
                 if (response.status == "connected")
                 {
                     UserID = response.authResponse.userID;
-                    ((ImageElement)Document.GetElementById("image")).Src = "http://graph.facebook.com/" + UserID + "/picture";
                 }
                 else
                 {
-                    ((ImageElement)Document.GetElementById("image")).Src = "";
                 }
             });
         }
