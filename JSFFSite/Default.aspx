@@ -34,7 +34,10 @@
     <div class="fb-login-button">
     </div>
     <div id="fb-root">
+        
     </div>
+    charge <input id="charge" type="text" />
+    distance <input id="distance" type="text" />
     <button id="login" title="Clickme">
         LogIn</button>
     <button id="graph" title="Clickme">
