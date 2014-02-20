@@ -64,6 +64,7 @@
   <ItemGroup>
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\jquery.js" />
     <Content Include="Scripts\require.js" />
     <Content Include="Scripts\Script.js" />
     <Content Include="Scripts\ss.js" />
@@ -72,7 +73,6 @@
     <Content Include="Scripts\ssloader.min.js" />
     <Content Include="Styles\JSFFStyle.css" />
     <Content Include="Styles\Site.css" />
-    <Content Include="Scripts\jquery.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

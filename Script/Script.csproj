@@ -33,6 +33,9 @@
     <DocumentationFile>bin\Release\Script.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="QueryEngines\BatchQuery.cs" />
+    <Compile Include="QueryEngines\FQLQuery.cs" />
+    <Compile Include="QueryEngines\IQueryEngine.cs" />
     <None Include="packages.config" />
     <None Include="Properties\FxCop.ruleset" />
     <Compile Include="FFJS.cs" />

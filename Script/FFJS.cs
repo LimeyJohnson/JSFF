@@ -20,6 +20,7 @@ namespace JSFFScript
         public static BehaviorObject Zoom;
         public static SelectObject SVG;
         public static bool FailCall = true;
+        public static IQueryEngine QueryEngine = new FQLQuery();
         static FFJS()
         {
             jQuery.OnDocumentReady(new Action(Onload));
@@ -34,9 +35,9 @@ namespace JSFFScript
         {
             string charge = jQuery.Select("#charge").GetValue();
             string distance = jQuery.Select("#distance").GetValue();
-            GraphFriends(null, string.IsNullOrEmpty(charge) ? -120 : int.Parse(charge), string.IsNullOrEmpty(distance) ? 80 : int.Parse(distance));
+            GraphFriends(null);
         }
-        public static void GraphFriends(jQueryEvent e, int charge, int linkDistance)
+        public static void GraphFriends(jQueryEvent e)
         {
             Date start = Date.Now;
             jQuery.Select("#canvas").Empty();
@@ -47,16 +48,17 @@ namespace JSFFScript
             {
                 if (!Script.Boolean(apiResponse.error))
                 {
-                    QueryFacebookForFreindsGraph(charge, linkDistance, start, nodes, links, apiResponse);
+                    QueryFacebookForFreindsGraph(start, nodes, links, apiResponse);
                 }
                 else
                 {
-                    jQuery.Select("body").Append("Error: "+apiResponse.error.Message);
+                    jQuery.Select("body").Append("Error: " + apiResponse.error.Message);
                 }
+
             });
         }
 
-        private static void QueryFacebookForFreindsGraph(int charge, int linkDistance, Date start, Array nodes, Array links, ApiResponse apiResponse)
+        private static void QueryFacebookForFreindsGraph(Date start, Array nodes, Array links, ApiResponse apiResponse)
         {
             for (int x = 0; x < ((FriendInfo[])apiResponse.data).Length; x++)
             {
@@ -68,59 +70,59 @@ namespace JSFFScript
                 noeNode.ID = friend.id;
                 nodes[nodes.Length] = noeNode;
             }
-            Queries q = new Queries();
-            q.friendsAll = "SELECT uid1, uid2 from friend WHERE uid1 = me()";
-            q.friendsoffriends = "SELECT uid1, uid2 FROM friend WHERE uid1 IN (SELECT uid2 from #friendsAll) AND uid2 IN (SELECT uid2 from #friendsAll) AND uid1 < uid2";
-
-            ApiOptions queryOptions = new ApiOptions();
-            queryOptions.method = "fql.multiquery";
-            queryOptions.queries = q;
-
-
-            Facebook.api(queryOptions, delegate(QueryResponse[] queryResponse)
+            jQuery.WhenData<Dictionary>(QueryEngine.RunQuery(Friends)).Then(delegate(Dictionary d)
             {
-                if(Script.Boolean(queryResponse[0]))
+                Friends = d;
+                BuildGraph(start, nodes, links);
+            }, delegate(Dictionary D)
+            {
+                QueryEngine = new BatchQuery();
+                jQuery.WhenData<Dictionary>(QueryEngine.RunQuery(Friends)).Then(delegate(Dictionary d)
                 {
 
-                }
-                else 
-                { 
-                    BuildGraph(charge, linkDistance, start, nodes, links, queryResponse); 
-                }
-                
+                }, delegate(Dictionary d)
+                {
+
+                });
             });
         }
 
-        private static void BuildGraph(int charge, int linkDistance, Date start, Array nodes, Array links, QueryResponse[] queryResponse)
+        private static void BuildGraph(Date start, Array nodes, Array links)
         {
-            for (int i = 0; i < queryResponse[1].fql_result_set.Length; i++)
-            {
-                MultiQueryResults results = queryResponse[1].fql_result_set[i];
-                Friend target = ((Friend)Friends[results.uid1]);
-                Friend origin = ((Friend)Friends[results.uid2]);
-                origin.links.Add(target.id);
-                target.links.Add(origin.id);
-                Link newLink = new Link();
-                newLink.Source = origin.index;
-                newLink.Target = target.index;
-                newLink.Value = 1;
-                links[links.Length] = newLink;
-            }
+
             Date finish = Date.Now;
             int milli = start.GetMilliseconds() - finish.GetMilliseconds();
             jQuery.Select("body").Append("query took: " + (milli / 1000));
 
-            CreateSVG(charge, linkDistance, nodes, links);
+            CreateSVG(nodes, links);
         }
 
-        private static void CreateSVG(int charge, int linkDistance, Array nodes, Array links)
+        private static void CreateSVG(Array nodes, Array links)
         {
             int width = 960;
             int height = 800;
 
+            jQuery.Each(Friends, delegate(string name, object value)
+            {
+                Friend f = (Friend)value;
+                int originID = int.Parse(f.id);
+                for(int x = 0; x<f.links.Count; x++)
+                {
+                    int targetID = int.Parse((string)f.links[x]);
+                    if(originID<targetID)
+                    {
+                        Link newLink = new Link();
+                        newLink.Source = f.index;
+                        newLink.Target = ((Friend)Friends[(string)f.links[x]]).index;
+                        newLink.Value = 1;
+                        links[links.Length] = newLink;
+                    }
+                }
+            });
+
             Zoom = D3.Behavior.Zoom().ScaleExtent(new double[] { 0.4, 4 }).On("zoom", Zoomed);
 
-            ForceObject force = D3.Layout.Force().Charge(charge).LinkDistance(linkDistance).Size(new int[] { width, height });
+            ForceObject force = D3.Layout.Force().Charge(-120).LinkDistance(80).Size(new int[] { width, height });
             SVG = D3.Select("#canvas").Append("svg").Attr("width", width).Attr("height", height).Call(Zoom).Append("g");
             force.Nodes((Node[])nodes).Links((Link[])links).Start();
             Links = SVG.SelectAll(".link").Data((Link[])links).Enter().Append("line").Attr("class", "link").Style("stroke-width", delegate(Dictionary d) { return Math.Sqrt((int)d["value"]); });
@@ -139,18 +141,6 @@ namespace JSFFScript
         {
             SelectedID = (string)arg["id"] == SelectedID ? null : (string)arg["id"];
             Update();
-        }
-        public static ArrayList SpitFriendsList(Friend[] list)
-        {
-            int splicecount = 50;
-            Friend[] friendsCopy = list;
-            ArrayList friendsList = new ArrayList();
-            for (int x = 0; friendsCopy.Length > 0; x++ )
-            {
-               friendsList.Add(friendsCopy.Slice(0, splicecount));
-               friendsCopy.Splice(0,splicecount);
-            }
-            return friendsList;
         }
         private static void Zoomed(Dictionary arg)
         {
