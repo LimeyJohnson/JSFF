@@ -6,3 +6,8 @@ obj
 TestResults
 JSFFScript.debug.js
 JSFFScript.js
+
+*.map
+AppConfig.js
+Main.js
+Friend.js

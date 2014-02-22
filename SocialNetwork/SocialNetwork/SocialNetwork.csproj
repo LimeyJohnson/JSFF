@@ -19,14 +19,17 @@
   <ItemGroup>
     <Content Include="app.css" />
     <TypeScriptCompile Include="app\AppConfig.ts" />
+    <Content Include="app\Main.js" />
     <Content Include="default.htm" />
     <Content Include="lib\jquery.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="app\AppMain.ts" />
-    <TypeScriptCompile Include="app\classes\greeter.ts" />
-    <TypeScriptCompile Include="Friend.ts" />
+    <TypeScriptCompile Include="app\Main.ts" />
+    <TypeScriptCompile Include="app\classes\Friend.ts" />
+    <TypeScriptCompile Include="Scripts\typings\d3\d3.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\d3\plugins\d3.superformula.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\Facebook\facebook.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\requirejs\require.d.ts" />
   </ItemGroup>

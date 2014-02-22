@@ -1,4 +1,4 @@
-export class Greeter {
+export class Main {
             element: HTMLElement;
         span: HTMLElement;
         timerToken: number;
