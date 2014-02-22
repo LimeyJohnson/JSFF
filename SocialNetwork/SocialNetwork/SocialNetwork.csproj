@@ -18,14 +18,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="app.css" />
-    <Content Include="app.js" />
+    <TypeScriptCompile Include="app\AppConfig.ts" />
     <Content Include="default.htm" />
     <Content Include="lib\jquery.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="app\AppMain.ts" />
+    <TypeScriptCompile Include="app\classes\greeter.ts" />
     <TypeScriptCompile Include="Friend.ts" />
-    <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\requirejs\require.d.ts" />
   </ItemGroup>
@@ -37,6 +38,9 @@
     <None Include="web.Release.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="modules\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

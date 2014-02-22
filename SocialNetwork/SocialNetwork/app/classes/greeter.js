@@ -2,7 +2,7 @@ define(["require", "exports"], function(require, exports) {
     var Greeter = (function () {
         function Greeter(element) {
             this.element = element;
-            this.element.innerHTML += "The time is: ";
+            this.element.innerText += "The time is: ";
             this.span = document.createElement('span');
             this.element.appendChild(this.span);
             this.span.innerText = new Date().toUTCString();
@@ -10,7 +10,7 @@ define(["require", "exports"], function(require, exports) {
         Greeter.prototype.start = function () {
             var _this = this;
             this.timerToken = setInterval(function () {
-                return _this.span.innerHTML = new Date().toUTCString();
+                return _this.span.innerText = new Date().toUTCString();
             }, 500);
         };
 
@@ -19,11 +19,6 @@ define(["require", "exports"], function(require, exports) {
         };
         return Greeter;
     })();
-
-    window.onload = function () {
-        var el = document.getElementById('content');
-        var greeter = new Greeter(el);
-        greeter.start();
-    };
+    exports.Greeter = Greeter;
 });
-//# sourceMappingURL=app.js.map
+//# sourceMappingURL=greeter.js.map
