@@ -1,11 +1,9 @@
-/// <reference path="classes/friend.ts" />
 /// <reference path="../scripts/typings/d3/d3.d.ts" />
 /// <reference path="../scripts/typings/jquery/jquery.d.ts" />
-/// <reference path="classes/queryengine.ts" />
 /// <reference path="../scripts/typings/facebook/facebook.d.ts" />
 
-import F = require("app/classes/friend");
-import Q = require("classes/queryengine");
+import F = require("./classes/friend");
+import Q = require("./classes/queryengine");
 
 export class Main {
     $: JQueryStatic;
@@ -28,8 +26,8 @@ export class Main {
     }
     start() {
         $(() => {
-            $('#login').click(this.loginHandler);
-            $('#graph').click(this.graphFriends);
+            $('#login').click((event) => this.loginHandler(event));
+            $('#graph').click((event) => this.graphFriends(event));
             FB.init({
                 appId: '459808530803920',
                 channelUrl: 'http://jsff.asurewebsites.com/channel.aspx',
@@ -60,7 +58,7 @@ export class Main {
         $('#canvas').empty();
         var nodes: string[] = [];
         var links = [];
-        FB.api('/me/friends', function (apiResponse) {
+        FB.api('/me/friends', (apiResponse) => {
             if (!!!apiResponse.error) {
                 this.queryFacebookForFreindsGraph(start, nodes, links, apiResponse);
             }

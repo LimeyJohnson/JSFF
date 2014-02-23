@@ -1,18 +1,13 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="JSFFSite.Default" %>
-
-<!DOCTYPE html>
-<html>
-<head runat="server">
+﻿<html>
+<head>
     <title>Friends Graph</title>
+    <link href="Styles/JSFFStyle.css" rel="stylesheet" />
+    <script data-main="app/AppConfig" type="text/javascript" src="lib/require.js"></script>
 </head>
 <body>
-    <link href="Styles/JSFFStyle.css" rel="stylesheet" />
-    <script src="Scripts/require.js"></script>
-    <script data-main="app/AppConfig" type="text/javascript" src="lib/require.js"></script>
     <div class="fb-login-button">
     </div>
     <div id="fb-root">
-
     </div>
     charge <input id="charge" type="text" />
     distance <input id="distance" type="text" />

@@ -19,9 +19,13 @@
   <ItemGroup>
     <Content Include="app.css" />
     <TypeScriptCompile Include="app\AppConfig.ts" />
+    <Content Include="app\AppConfig.js" />
+    <Content Include="app\classes\Friend.js" />
+    <Content Include="app\classes\QueryEngine.js" />
     <Content Include="app\Main.js" />
     <Content Include="default.htm" />
     <Content Include="lib\jquery.js" />
+    <Content Include="lib\require.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>

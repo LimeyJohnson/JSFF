@@ -1,5 +1,4 @@
-﻿/// <reference path="../../scripts/typings/facebook/facebook.d.ts" />
-import F = require("friend");
+﻿import F = require("friend");
 export class IQueryEngine {
     FB: IFacebook;
     constructor(facebook: IFacebook) {
