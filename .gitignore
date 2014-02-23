@@ -8,6 +8,10 @@ JSFFScript.debug.js
 JSFFScript.js
 
 *.map
+*.pubxml
+*.pubxml.user
+*.suo
 AppConfig.js
 Main.js
 Friend.js
+QueryEngine.js

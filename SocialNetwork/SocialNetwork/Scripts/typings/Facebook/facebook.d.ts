@@ -67,6 +67,7 @@ interface IFacebookAPIMusicListensResponseData {
 }
 
 
+
 // when getting a single song by a id
 interface IFacebookAPIMusicSong {
     id: string;
@@ -269,7 +270,15 @@ interface IFacebookInitParameters {
         elem: HTMLElement;
     }) => {};
 }
+interface IQueryOptions {
+    friendsAll: string;
+    friendsoffriends: string;
+}
 
+interface IFQLQueryApiOptions extends Object {
+    method: string;
+    queries: IQueryOptions;
+}
 interface IFacebook {
 
     init(options: IFacebookInitParameters): void;
@@ -280,6 +289,7 @@ interface IFacebook {
     api(path: string, params: Object, cb: (response?: any) => void): void;
     api(path: string, method: string, cb: (response?: any) => void): void;
     api(path: string, method: string, params: Object, cb: (response?: any) => void): void;
+    api(params: IFQLQueryApiOptions, cb: (response?: any) => void): void; 
 
     ui(
         params?: IFacebookUIParameters,
