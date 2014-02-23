@@ -11,6 +11,7 @@ JSFFScript.js
 *.pubxml
 *.pubxml.user
 *.suo
+*.user
 AppConfig.js
 Main.js
 Friend.js
