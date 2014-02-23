@@ -3,6 +3,10 @@ export interface FriendMap {
 }
 
 export class Friend {
+    constructor() {
+        this.links = [];
+        this.name = "unknown";
+    }
     index: number;
     name: string;
     id: number;

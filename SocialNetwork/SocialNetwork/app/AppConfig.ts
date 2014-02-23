@@ -27,6 +27,6 @@ require.config({
 require(['Main', "d3", "Facebook", "jquery"],
     (main, d3, Facebook, $) => {
         // code from window.onload
-        var appMain = new main.Main();
+        var appMain = new main.Main($, d3, Facebook);
         appMain.start();
     });

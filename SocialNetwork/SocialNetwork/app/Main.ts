@@ -71,10 +71,11 @@ export class Main {
         var date: Date = new Date();
         return date.getTime();
     }
-    queryFacebookForFreindsGraph(start: Number, nodes: D3.Layout.GraphNode[], links, apiResponse) {
+    queryFacebookForFreindsGraph(start: number, nodes: D3.Layout.GraphNode[], links, apiResponse) {
         for (var x = 0; x < (apiResponse.data).length; x++) {
             var friend = new F.Friend();
-            friend.id = apiResponse.data[x];
+            friend.id = apiResponse.data[x].id;
+            friend.name = apiResponse.data[x].name;
             friend.index = x;
             this.friends[friend.id] = friend;
             nodes.push({
@@ -83,43 +84,40 @@ export class Main {
                 id: friend.id
             });
         }
-        $.when(this.queryEngine.RunQuery(this.friends)).then(function (d: F.FriendMap) {
+        $.when(this.queryEngine.RunQuery(this.friends)).then((d: F.FriendMap) => {
             this.friends = d;
-            this.buildGraph(start, nodes, links);
-        }, function (...reasons: any[]) {
+            this.createSVG(this.friends,start, nodes, links);
+        }, (...reasons: any[]) => {
                 this.queryEngine = new Q.BatchQuery(FB);
-                $.when(this.queryEngine.RunQuery(this.friends)).then(function (d) {
+                $.when(this.queryEngine.RunQuery(this.friends)).then( (d)=> {
                     this.friends = d;
-                    this.buildGraph(start, nodes, links);
+                    this.createSVG(this.friends, start, nodes, links);
                 }, function (...reasons: any[]) {
                     });
             });
     }
-    buildGraph(start:number, nodes, links) {
-        var finish:number = this.Time;
+   
+    createSVG(friends: F.FriendMap, start: number, nodes, links: D3.Layout.GraphLink[]) {
+        this.friends = friends;
+        var finish: number = this.Time;
         var milli = start - finish;
         $('body').append('query took: ' + (milli / 1000));
-        this.createSVG(nodes, links);
-    }
-    createSVG(nodes, links: D3.Layout.GraphLink[]) {
         var width = 960;
         var height = 800;
-        $.each(this.friends, function (name, value) {
-            var f = value;
-            var originID = parseInt(f.id);
+        for (var friend in this.friends) {
+            var f: F.Friend = friend;
             for (var x = 0; x < f.links.length; x++) {
-                var targetID = parseInt(f.links[x]);
-                if (originID < targetID) {
+                if (f.id < f.links[x]) {
                     links.push({
                     source: f.index,
-                    target: (this.friends[f.links[x]]).index
+                        target: (this.friends[f.links[x]]).index
                     });
                 }
             }
-        });
-        this.zoom = d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom',this.zoomed);
-        var force = d3.layout.force().charge(-120).linkDistance(80).size([width, height]);
-        this.svg =  d3.select('#canvas').append('svg').attr('width', width).attr('height', height).call(this.zoom).append('g');
+        }
+        this.zoom = this.d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom',this.zoomed);
+        var force = this.d3.layout.force().charge(-120).linkDistance(80).size([width, height]);
+        this.svg =  this.d3.select('#canvas').append('svg').attr('width', width).attr('height', height).call(this.zoom).append('g');
         force.nodes(nodes).links(links).start();
         this.links = this.svg.selectAll('.link').data(links).enter().append('line').attr('class', 'link').style('stroke-width', function (d) {
             return Math.sqrt(d['value']);
