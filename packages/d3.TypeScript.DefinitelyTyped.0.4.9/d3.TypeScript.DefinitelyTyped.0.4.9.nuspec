@@ -3,7 +3,6 @@
   <metadata>
     <id>d3.TypeScript.DefinitelyTyped</id>
     <version>0.4.9</version>
-    <title>d3.TypeScript.DefinitelyTyped</title>
     <authors>Jason Jarrett</authors>
     <owners>Jason Jarrett</owners>
     <licenseUrl>https://github.com/DefinitelyTyped/NugetAutomation/blob/master/LICENSE.MIT</licenseUrl>
@@ -13,7 +12,6 @@
     <description>TypeScript Definitions (d.ts) for d3. Generated based off the DefinitelyTyped repository [git commit: df63723fae79de196b31709e0a72a70ef67ef58e]. http://github.com/DefinitelyTyped</description>
     <releaseNotes />
     <copyright>Copyright 2013</copyright>
-    <language />
     <tags>TypeScript JavaScript</tags>
   </metadata>
 </package>
