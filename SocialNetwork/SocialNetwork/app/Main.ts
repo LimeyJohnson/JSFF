@@ -10,7 +10,7 @@ export class Main {
     d3: D3.Base;
     FB: IFacebook;
     userID: string;
-    friends: F.FriendMap;
+    static friends: F.FriendMap;
     queryEngine: Q.IQueryEngine = new Q.FQLQuery(FB);
     zoom: D3.Behavior.Zoom;
     svg: D3.Selection;
@@ -21,7 +21,7 @@ export class Main {
         this.$ = jQuery;
         this.d3 = d3;
         this.FB = facebook;
-        this.friends = {};
+        Main.friends = {};
         var seome = new F.Friend();
     }
     start() {
@@ -77,56 +77,55 @@ export class Main {
             friend.id = apiResponse.data[x].id;
             friend.name = apiResponse.data[x].name;
             friend.index = x;
-            this.friends[friend.id] = friend;
+            Main.friends[friend.id] = friend;
             nodes.push({
                 name: friend.name,
                 group: 1,
                 id: friend.id
             });
         }
-        $.when(this.queryEngine.RunQuery(this.friends)).then((d: F.FriendMap) => {
-            this.friends = d;
-            this.createSVG(this.friends,start, nodes, links);
+        $.when(this.queryEngine.RunQuery(Main.friends)).then((d: F.FriendMap) => {
+            Main.friends = d;
+            this.createSVG(start, nodes, links);
         }, (...reasons: any[]) => {
                 this.queryEngine = new Q.BatchQuery(FB);
-                $.when(this.queryEngine.RunQuery(this.friends)).then( (d)=> {
-                    this.friends = d;
-                    this.createSVG(this.friends, start, nodes, links);
+                $.when(this.queryEngine.RunQuery(Main.friends)).then( (d)=> {
+                    Main.friends = d;
+                    this.createSVG(start, nodes, links);
                 }, function (...reasons: any[]) {
                     });
             });
     }
    
-    createSVG(friends: F.FriendMap, start: number, nodes, links: D3.Layout.GraphLink[]) {
-        this.friends = friends;
+    createSVG(start: number, nodes, links: D3.Layout.GraphLink[]) {
         var finish: number = this.Time;
         var milli = start - finish;
         $('body').append('query took: ' + (milli / 1000));
         var width = 960;
         var height = 800;
-        for (var friend in this.friends) {
-            var f: F.Friend = friend;
+        for (var friendID in Main.friends) {
+            var f: F.Friend = Main.friends[friendID];
             for (var x = 0; x < f.links.length; x++) {
                 if (f.id < f.links[x]) {
                     links.push({
                     source: f.index,
-                        target: (this.friends[f.links[x]]).index
+                        target: (Main.friends[f.links[x]]).index
                     });
                 }
             }
         }
-        this.zoom = this.d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom',this.zoomed);
+        this.zoom = this.d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom', () =>this.zoomed);
         var force = this.d3.layout.force().charge(-120).linkDistance(80).size([width, height]);
         this.svg =  this.d3.select('#canvas').append('svg').attr('width', width).attr('height', height).call(this.zoom).append('g');
         force.nodes(nodes).links(links).start();
         this.links = this.svg.selectAll('.link').data(links).enter().append('line').attr('class', 'link').style('stroke-width', function (d) {
             return Math.sqrt(d['value']);
         });
-        this.nodes = this.svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 7).call(force.drag).on('mousemove', this.onMouseMove).on('mouseover', this.onMouseOver).on('mouseout', this.onMouseOut).on('click', this.onNodeClick);
+        this.nodes = this.svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 7).call(force.drag).on('mousemove', () => this.onMouseMove).on('mouseover', () => this.onMouseOver).on('mouseout', () => this.onMouseOut).on('click', () =>this.onNodeClick);
         this.nodes.append('title').text(function (D) {
             return D['name'];
         });
-        force.on('tick', this.update);
+        force.on('tick', ()=>this.update);
     }
     update () {
         this.links.attr('x1', function (D) {
@@ -153,7 +152,7 @@ export class Main {
                 if (!!!this.selectedID) {
                     return 'black';
                 }
-                if (((this.friends[this.selectedID]).links.indexOf(D['id']) >= 0)) {
+                if (((Main.friends[this.selectedID]).links.indexOf(D['id']) >= 0)) {
                     return 'red';
                 }
                 return (D['id'] === this.selectedID) ? 'green' : 'black';

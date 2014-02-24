@@ -79,7 +79,7 @@ export class FQLQuery extends IQueryEngine {
                         origin.links.push(target.id);
                         target.links.push(origin.id);
                     }
-                    returnPromise.resolveWith(friends);
+                    returnPromise.resolve(friends);
                 }
             });
         return returnPromise.promise();
