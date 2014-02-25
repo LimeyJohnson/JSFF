@@ -1172,7 +1172,7 @@ declare module D3 {
         }
 
         export interface GraphNode  {
-            id?: number;
+            id?: string;
             index?: number;
             name?: string;
             px?: number;

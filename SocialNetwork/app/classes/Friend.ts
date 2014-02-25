@@ -9,6 +9,6 @@ export class Friend {
     }
     index: number;
     name: string;
-    id: number;
-    links: number[];
+    id: string;
+    links: string[];
 }

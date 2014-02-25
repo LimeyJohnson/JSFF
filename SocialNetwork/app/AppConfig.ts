@@ -24,9 +24,15 @@ require.config({
 
 });
 
+
+
 require(['Main', "d3", "Facebook", "jquery"],
     (main, d3, Facebook, $) => {
         // code from window.onload
-        var appMain = new main.Main($, d3, Facebook);
-        appMain.start();
+        var facebookInfo = window.location.host == "localhost:26953" ?
+            { appId: "157431201112518", channelURL: "http://localhost:26953/" } :
+            { appId: "459808530803920", channelURL: "http://socialnetwork.limeyjohnson.net/channel.aspx" }
+       
+        main.Main($, d3, Facebook, facebookInfo);
+        main.Main.start();
     });
