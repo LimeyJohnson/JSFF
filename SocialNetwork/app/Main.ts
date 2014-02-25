@@ -7,19 +7,19 @@ import Q = require("./classes/queryengine");
 
 export class Main {
     $: JQueryStatic;
-    d3: D3.Base;
+    static d3: D3.Base;
     FB: IFacebook;
     userID: string;
     static friends: F.FriendMap;
     queryEngine: Q.IQueryEngine = new Q.FQLQuery(FB);
-    zoom: D3.Behavior.Zoom;
-    svg: D3.Selection;
-    links: D3.Selection;
-    nodes: D3.Selection;
-    selectedID: string;
+    static zoom: D3.Behavior.Zoom;
+    static svg: D3.Selection;
+    static links: D3.Selection;
+    static nodes: D3.Selection;
+    static selectedID: string;
     constructor(jQuery: JQueryStatic, d3: D3.Base, facebook: IFacebook) {
         this.$ = jQuery;
-        this.d3 = d3;
+        Main.d3 = d3;
         this.FB = facebook;
         Main.friends = {};
         var seome = new F.Friend();
@@ -84,12 +84,12 @@ export class Main {
                 id: friend.id
             });
         }
-        $.when(this.queryEngine.RunQuery(Main.friends)).then((d: F.FriendMap) => {
+        this.queryEngine.RunQuery(Main.friends).then((d: F.FriendMap) => {
             Main.friends = d;
             this.createSVG(start, nodes, links);
         }, (...reasons: any[]) => {
                 this.queryEngine = new Q.BatchQuery(FB);
-                $.when(this.queryEngine.RunQuery(Main.friends)).then( (d)=> {
+                this.queryEngine.RunQuery(Main.friends).then( (d)=> {
                     Main.friends = d;
                     this.createSVG(start, nodes, links);
                 }, function (...reasons: any[]) {
@@ -114,21 +114,21 @@ export class Main {
                 }
             }
         }
-        this.zoom = this.d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom', () =>this.zoomed);
-        var force = this.d3.layout.force().charge(-120).linkDistance(80).size([width, height]);
-        this.svg =  this.d3.select('#canvas').append('svg').attr('width', width).attr('height', height).call(this.zoom).append('g');
+        Main.zoom = Main.d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom', () =>this.zoomed);
+        var force = Main.d3.layout.force().charge(-120).linkDistance(80).size([width, height]);
+        Main.svg = Main.d3.select('#canvas').append('svg').attr('width', width).attr('height', height).call(Main.zoom).append('g');
         force.nodes(nodes).links(links).start();
-        this.links = this.svg.selectAll('.link').data(links).enter().append('line').attr('class', 'link').style('stroke-width', function (d) {
+        Main.links = Main.svg.selectAll('.link').data(links).enter().append('line').attr('class', 'link').style('stroke-width', function (d) {
             return Math.sqrt(d['value']);
         });
-        this.nodes = this.svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 7).call(force.drag).on('mousemove', () => this.onMouseMove).on('mouseover', () => this.onMouseOver).on('mouseout', () => this.onMouseOut).on('click', () =>this.onNodeClick);
-        this.nodes.append('title').text(function (D) {
+        Main.nodes = Main.svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 7).call(force.drag).on('mousemove', this.onMouseMove).on('mouseover', this.onMouseOver).on('mouseout', this.onMouseOut).on('click', Main.onNodeClick);
+        Main.nodes.append('title').text(function (D) {
             return D['name'];
         });
-        force.on('tick', ()=>this.update);
+        force.on('tick', Main.update);
     }
-    update () {
-        this.links.attr('x1', function (D) {
+    static update () {
+        Main.links.attr('x1', function (D) {
             return (D['source'])['x'];
         }).attr('y1', function (D) {
                 return (D['source'])['y'];
@@ -137,49 +137,49 @@ export class Main {
             }).attr('y2', function (D) {
                 return (D['target'])['y'];
             }).style('stroke-width', function (D) {
-                if (!!this.selectedID && Main.matchesTargetOrSource(D, this.selectedID)) {
+                if (!!Main.selectedID && Main.matchesTargetOrSource(D, Main.selectedID)) {
                     return 2;
                 }
                 else {
                     return 1;
                 }
             });
-        this.nodes.attr('cx', function (D) {
+        Main.nodes.attr('cx', function (D) {
             return D['x'];
         }).attr('cy', function (D) {
                 return D['y'];
             }).attr('fill', function (D) {
-                if (!!!this.selectedID) {
+                if (!!!Main.selectedID) {
                     return 'black';
                 }
-                if (((Main.friends[this.selectedID]).links.indexOf(D['id']) >= 0)) {
+                if (((Main.friends[Main.selectedID]).links.indexOf(D['id']) >= 0)) {
                     return 'red';
                 }
-                return (D['id'] === this.selectedID) ? 'green' : 'black';
+                return (D['id'] === Main.selectedID) ? 'green' : 'black';
             });
     }
     onMouseMove (d) {
-        d3.event.stopPropagation();
+        Main.d3.event.stopPropagation();
         var callout = $('#callout');
     }
     onMouseOver (d) {
-        d3.event.stopPropagation();
+        Main.d3.event.stopPropagation();
         var callout = $('#callout');
         callout.show();
-        var template = "<p><img src='http://graph.facebook.com/{0}/picture' alt='{1}' height='100' width='100'></p><p>{1}</p>";
-        callout.html(/*ss.format(template, d['id'], d['name'])*/);
+        var template:string = "<p><img src='http://graph.facebook.com/{0}/picture' alt='{1}' height='100' width='100'></p><p>{1}</p>";
+        callout.html(template, d['id'], d['name']));
     }
     onMouseOut = function (d) {
-        d3.event.stopPropagation();
+        Main.d3.event.stopPropagation();
         var callout = $('#callout');
         callout.hide();
     }
-    onNodeClick(arg) {
-        this.selectedID = (arg['id'] == this.selectedID) ? null : arg['id'];
-        this.update();
+    static onNodeClick(arg) {
+        Main.selectedID = (arg['id'] == Main.selectedID) ? null : arg['id'];
+        Main.update();
     }
     zoomed(arg) {
-        this.svg.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
+        Main.svg.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
     }
     static matchesTargetOrSource(d, id) {
         return (d['source'])['id'] === id || (d['target'])['id'] === id;

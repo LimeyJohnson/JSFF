@@ -17,7 +17,6 @@
     <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="app.css" />
     <TypeScriptCompile Include="app\AppConfig.ts" />
     <Content Include="app\AppConfig.js" />
     <Content Include="app\classes\Friend.js" />
@@ -26,6 +25,7 @@
     <Content Include="default.htm" />
     <Content Include="lib\jquery.js" />
     <Content Include="lib\require.js" />
+    <Content Include="styles\SocialNetwork.css" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -48,9 +48,7 @@
       <DependentUpon>web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="modules\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
