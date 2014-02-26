@@ -15,14 +15,25 @@ interface IFacebookAPIMoviesResponseData {
     name: string;
 }
 
-// api(/me/movies)
-interface IFacebookAPIMoviesResponse {
-    data: IFacebookAPIMoviesResponseData[];
+interface IFaceBookPagingResponse {
     paging: {
         next: string;
     };
 }
 
+// api(/me/movies)
+interface IFacebookAPIMoviesResponse extends IFaceBookPagingResponse {
+    data: IFacebookAPIMoviesResponseData[];
+    
+}
+
+//api(/me/mutualfriends/userid)
+interface IFaceBookMutualFriends extends IFaceBookPagingResponse {
+    data: {
+        id: string;
+        name: string;
+    }[]
+}
 
 interface IFacebookAPIMusicListensResponseData {
     id: string;

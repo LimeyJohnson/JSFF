@@ -101,7 +101,8 @@ export class Main {
             Main.queryEngine.RunQuery(Main.friends).then( (d)=> {
                     Main.friends = d;
                     Main.createSVG(start, nodes, links);
-                }, function (...reasons: any[]) {
+            }, function (...reasons: any[]) {
+                window.alert("Failed Batch Query");
                     });
             });
     }
