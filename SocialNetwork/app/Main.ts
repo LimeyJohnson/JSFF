@@ -175,7 +175,7 @@ export class Main {
         var callout = $('#callout');
         callout.show();
         var template:string = "<p><img src='http://graph.facebook.com/{0}/picture' alt='{1}' height='100' width='100'></p><p>{1}</p>";
-        callout.html(template.replace("{0}", d.name).replace("{1}", d.name).replace("{1}",d.name));
+        callout.html(template.replace("{0}", d.id).replace("{1}", d.name).replace("{1}",d.name));
     }
     static onMouseOut = function (d) {
         Main.d3.event.stopPropagation();
