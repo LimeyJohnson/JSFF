@@ -19,7 +19,7 @@ export class Main {
     static FB: IFacebook;
     static userID: string;
     static friends: F.FriendMap;
-    static queryEngine: Q.IQueryEngine = new Q.FQLQuery(FB);
+    static queryEngine: Q.IQueryEngine = new Q.FQLQuery();
     static zoom: D3.Behavior.Zoom;
     static svg: D3.Selection;
     static links: D3.Selection;
@@ -93,12 +93,12 @@ export class Main {
                 id: friend.id
             });
         }
-        Main.queryEngine.RunQuery(Main.friends).then((d: F.FriendMap) => {
+        Main.queryEngine.RunQuery(Main.friends, Main.FB).then((d: F.FriendMap) => {
             Main.friends = d;
             Main.createSVG(start, nodes, links);
         }, (...reasons: any[]) => {
-            Main.queryEngine = new Q.BatchQuery(FB);
-            Main.queryEngine.RunQuery(Main.friends).then( (d)=> {
+            Main.queryEngine = new Q.BatchQuery();
+            Main.queryEngine.RunQuery(Main.friends, Main.FB).then( (d)=> {
                     Main.friends = d;
                     Main.createSVG(start, nodes, links);
             }, function (...reasons: any[]) {

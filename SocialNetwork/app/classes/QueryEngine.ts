@@ -1,11 +1,7 @@
 ﻿/// <reference path="../../scripts/typings/facebook/facebook.d.ts" />
 import F = require("friend");
 export class IQueryEngine {
-    FB: IFacebook;
-    constructor(facebook: IFacebook) {
-        this.FB = facebook;
-    }
-    RunQuery(friends: F.FriendMap): JQueryPromise<F.FriendMap> {
+    RunQuery(friends: F.FriendMap, fb:IFacebook): JQueryPromise<F.FriendMap> {
         return null;
     }
 }
@@ -15,7 +11,7 @@ export class BatchQuery extends IQueryEngine {
     static responseCount: number;
     static friends: F.FriendMap;
     static batchesComplete: JQueryDeferred<F.FriendMap>;
-    RunQuery(friends: F.FriendMap): JQueryPromise<F.FriendMap> {
+    RunQuery(friends: F.FriendMap, FB: IFacebook): JQueryPromise<F.FriendMap> {
         BatchQuery.batchesComplete = $.Deferred();
         BatchQuery.requestCount = BatchQuery.responseCount = 0;
         BatchQuery.friends = friends;
@@ -72,7 +68,7 @@ export class BatchQuery extends IQueryEngine {
 }
 
 export class FQLQuery extends IQueryEngine {
-    RunQuery(friends: F.FriendMap): JQueryPromise<F.FriendMap> {
+    RunQuery(friends: F.FriendMap, FB: IFacebook): JQueryPromise<F.FriendMap> {
         var returnPromise = $.Deferred();
         FB.api({
             method: 'fql.multiquery',
