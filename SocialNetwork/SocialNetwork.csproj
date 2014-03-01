@@ -20,6 +20,7 @@
     <TypeScriptCompile Include="app\AppConfig.ts" />
     <Content Include="app\AppConfig.js" />
     <Content Include="app\classes\Friend.js" />
+    <Content Include="app\classes\FriendStats.js" />
     <Content Include="app\classes\QueryEngine.js" />
     <Content Include="app\Main.js" />
     <Content Include="default.htm" />
@@ -29,6 +30,7 @@
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="app\classes\FriendStats.ts" />
     <TypeScriptCompile Include="app\classes\QueryEngine.ts" />
     <TypeScriptCompile Include="app\Main.ts" />
     <TypeScriptCompile Include="app\classes\Friend.ts" />

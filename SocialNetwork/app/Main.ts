@@ -2,12 +2,9 @@
 /// <reference path="../scripts/typings/jquery/jquery.d.ts" />
 /// <reference path="../scripts/typings/facebook/facebook.d.ts" />
 
-
-
-
 import F = require("./classes/friend");
 import Q = require("./classes/queryengine");
-
+import S = require("./classes/friendstats");
 export interface fbInfo {
     appId: string;
     channelURL: string;
@@ -30,7 +27,6 @@ export class Main {
         Main.$ = jQuery;
         Main.d3 = d3;
         Main.FB = facebook;
-        Main.friends = {};
         Main.facebookInfo = facebookInfo;
     }
     static start() {
@@ -63,13 +59,13 @@ export class Main {
         FB.login((response) => {}, { scope: "email" });
     }
     static graphFriends(event: JQueryEventObject) {
+        Main.friends = {};
         var start = Main.Time;
         $('#canvas').empty();
-        var nodes: string[] = [];
-        var links = [];
+        
         FB.api('/me/friends', (apiResponse) => {
             if (!!!apiResponse.error) {
-                Main.queryFacebookForFreindsGraph(start, nodes, links, apiResponse);
+                Main.queryFacebookForFreindsGraph(start, apiResponse);
             }
             else {
                 $('body').append('Error: ' + apiResponse.error.message);
@@ -80,41 +76,50 @@ export class Main {
         var date: Date = new Date();
         return date.getTime();
     }
-    static queryFacebookForFreindsGraph(start: number, nodes: D3.Layout.GraphNode[], links, apiResponse) {
+    static queryFacebookForFreindsGraph(start: number, apiResponse) {
         for (var x = 0; x < (apiResponse.data).length; x++) {
             var friend = new F.Friend();
             friend.id = apiResponse.data[x].id;
             friend.name = apiResponse.data[x].name;
             friend.index = x;
             Main.friends[friend.id] = friend;
-            nodes.push({
-                name: friend.name,
-                group: 1,
-                id: friend.id
-            });
+            
         }
         Main.queryEngine.RunQuery(Main.friends, Main.FB).then((d: F.FriendMap) => {
             Main.friends = d;
-            Main.createSVG(start, nodes, links);
+            S.FriendStats.GetFriendStats(Main.friends);
+            $('body').append('FQL FriendsMap: ' + S.FriendStats.friendCount +"<br/>");
+            $('body').append('FQL LinksMap: ' + S.FriendStats.linkCount + "<br/>");
+            Main.createSVG(start);
         }, (...reasons: any[]) => {
             Main.queryEngine = new Q.BatchQuery();
             Main.queryEngine.RunQuery(Main.friends, Main.FB).then( (d)=> {
-                    Main.friends = d;
-                    Main.createSVG(start, nodes, links);
+                Main.friends = d;
+                S.FriendStats.GetFriendStats(Main.friends);
+                $('body').append('Multi FriendsMap: ' + S.FriendStats.friendCount + "<br/>");
+                $('body').append('Multi LinksMap: ' + S.FriendStats.linkCount + "<br/>");
+                    Main.createSVG(start);
             }, function (...reasons: any[]) {
                 window.alert("Failed Batch Query");
                     });
             });
     }
    
-    static createSVG(start: number, nodes, links: D3.Layout.GraphLink[]) {
+    static createSVG(start: number) {
         var finish: number = Main.Time;
-        var milli = start - finish;
-        $('body').append('query took: ' + (milli / 1000));
+        var milli = finish - start;
+        var nodes: D3.Layout.GraphNode[] = [];
+        var links: D3.Layout.GraphLink[] = [];
+        $('body').append('query took: ' + (milli / 1000) + "<br/>");
         var width = 960;
         var height = 800;
         for (var friendID in Main.friends) {
             var f: F.Friend = Main.friends[friendID];
+            nodes.push({
+                name: f.name,
+                group: 1,
+                id: f.id
+            });
             for (var x = 0; x < f.links.length; x++) {
                 if (f.id < f.links[x]) {
                     links.push({
@@ -124,6 +129,8 @@ export class Main {
                 }
             }
         }
+        $('body').append('Friends Nodes: ' + nodes.length + "<br/>");
+        $('body').append('Graph Links: ' + links.length + "<br/>");
         Main.zoom = Main.d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom',Main.zoomed);
         var force = Main.d3.layout.force().charge(-120).linkDistance(80).size([width, height]);
         Main.svg = Main.d3.select('#canvas').append('svg').attr('width', width).attr('height', height).call(Main.zoom).append('g');
@@ -174,8 +181,8 @@ export class Main {
         Main.d3.event.stopPropagation();
         var callout = $('#callout');
         callout.show();
-        var template:string = "<p><img src='http://graph.facebook.com/{0}/picture' alt='{1}' height='100' width='100'></p><p>{1}</p>";
-        callout.html(template.replace("{0}", d.id).replace("{1}", d.name).replace("{1}",d.name));
+        var template:string = "<p><img src='http://graph.facebook.com/{0}/picture' alt='{1}' height='100' width='100'></p><p>{1} ({0})</p>";
+        callout.html(template.replace("{0}", d.id).replace("{0}", d.id).replace("{1}", d.name).replace("{1}",d.name));
     }
     static onMouseOut = function (d) {
         Main.d3.event.stopPropagation();
