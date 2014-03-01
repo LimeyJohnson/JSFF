@@ -15,40 +15,40 @@ export class Main {
     static $: JQueryStatic;
     static d3: D3.Base;
     static FB: IFacebook;
-    static userID: string;
-    static friends: F.FriendMap;
-    static queryEngine: Q.IQueryEngine = new Q.FQLQuery();
-    static zoom: D3.Behavior.Zoom;
-    static svg: D3.Selection;
-    static links: D3.Selection;
-    static nodes: D3.Selection;
-    static selectedID: string;
-    static facebookInfo: fbInfo;
+    static UserID: string;
+    static Friends: F.FriendMap;
+    static QueryEngine: Q.IQueryEngine = new Q.FQLQuery();
+    static Zoom: D3.Behavior.Zoom;
+    static Svg: D3.Selection;
+    static Links: D3.Selection;
+    static Nodes: D3.Selection;
+    static SelectedID: string;
+    static FacebookInfo: fbInfo;
     constructor(jQuery: JQueryStatic, d3: D3.Base, facebook: IFacebook, facebookInfo:fbInfo) {
         Main.$ = jQuery;
         Main.d3 = d3;
         Main.FB = facebook;
-        Main.facebookInfo = facebookInfo;
+        Main.FacebookInfo = facebookInfo;
     }
     static start() {
         $(() => {
             $('#login').click((event) => Main.loginHandler(event));
             $('#graph').click((event) => Main.graphFriends(event));
             FB.init({
-                appId: Main.facebookInfo.appId,
-                channelUrl: Main.facebookInfo.channelURL,
+                appId: Main.FacebookInfo.appId,
+                channelUrl: Main.FacebookInfo.channelURL,
                 status: true,
                 cookie: true,
                 xfbml: false
             });
             FB.getLoginStatus((loginResponse) => {
                 if (loginResponse.status === 'connected') {
-                    Main.userID = loginResponse.authResponse.userID;
+                    Main.UserID = loginResponse.authResponse.userID;
                 }
             });
             FB.Event.subscribe('auth.authResponseChange', (response) => {
                 if (response.status === 'connected') {
-                    Main.userID = response.authResponse.userID;
+                    Main.UserID = response.authResponse.userID;
                 }
                 else {
                 }
@@ -57,13 +57,23 @@ export class Main {
 
     }
     static loginHandler(event: JQueryEventObject) {
-        FB.login((response) => {}, { scope: "email" });
+        FB.login((response) => {
+            Main.UserID = response.authResponse.userID;
+            Main.graphFriends(null);
+        }, { scope: "email" });
+    }
+    static clearVariables() {
+        Main.Friends = {};
+        
+        $('#canvas').empty();
+        Main.Svg = null;
+        Main.Links = null;
+        Main.Nodes = null;
+        Main.Zoom = null;
     }
     static graphFriends(event: JQueryEventObject) {
-        Main.friends = {};
+        Main.clearVariables();
         var start = Main.Time;
-        $('#canvas').empty();
-        
         FB.api('/me/friends', (apiResponse) => {
             if (!!!apiResponse.error) {
                 Main.queryFacebookForFreindsGraph(start, apiResponse);
@@ -83,20 +93,20 @@ export class Main {
             friend.id = apiResponse.data[x].id;
             friend.name = apiResponse.data[x].name;
             friend.index = x;
-            Main.friends[friend.id] = friend;
+            Main.Friends[friend.id] = friend;
             
         }
-        Main.queryEngine.RunQuery(Main.friends, Main.FB).then((d: F.FriendMap) => {
-            Main.friends = d;
-            S.FriendStats.GetFriendStats(Main.friends);
+        Main.QueryEngine.RunQuery(Main.Friends, Main.FB).then((d: F.FriendMap) => {
+            Main.Friends = d;
+            S.FriendStats.GetFriendStats(Main.Friends);
             $('body').append('FQL FriendsMap: ' + S.FriendStats.friendCount +"<br/>");
             $('body').append('FQL LinksMap: ' + S.FriendStats.linkCount + "<br/>");
             Main.createSVG(start);
         }, (...reasons: any[]) => {
-            Main.queryEngine = new Q.BatchQuery();
-            Main.queryEngine.RunQuery(Main.friends, Main.FB).then( (d)=> {
-                Main.friends = d;
-                S.FriendStats.GetFriendStats(Main.friends);
+            Main.QueryEngine = new Q.BatchQuery();
+            Main.QueryEngine.RunQuery(Main.Friends, Main.FB).then( (d)=> {
+                Main.Friends = d;
+                S.FriendStats.GetFriendStats(Main.Friends);
                 $('body').append('Multi FriendsMap: ' + S.FriendStats.friendCount + "<br/>");
                 $('body').append('Multi LinksMap: ' + S.FriendStats.linkCount + "<br/>");
                     Main.createSVG(start);
@@ -114,8 +124,8 @@ export class Main {
         $('body').append('query took: ' + (milli / 1000) + "<br/>");
         var width = 960;
         var height = 800;
-        for (var friendID in Main.friends) {
-            var f: F.Friend = Main.friends[friendID];
+        for (var friendID in Main.Friends) {
+            var f: F.Friend = Main.Friends[friendID];
             nodes.push({
                 name: f.name,
                 group: 1,
@@ -125,20 +135,20 @@ export class Main {
                 if (f.id < f.links[x]) {
                     links.push({
                     source: f.index,
-                        target: (Main.friends[f.links[x]]).index
+                        target: (Main.Friends[f.links[x]]).index
                     });
                 }
             }
         }
         $('body').append('Friends Nodes: ' + nodes.length + "<br/>");
         $('body').append('Graph Links: ' + links.length + "<br/>");
-        Main.zoom = Main.d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom',Main.zoomed);
-        var force = Main.d3.layout.force().charge(-120).linkDistance(80).size([width, height]);
-        Main.svg = Main.d3.select('#canvas').append('svg').attr('width', width).attr('height', height).call(Main.zoom).append('g');
+        //Main.Zoom = Main.d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom',Main.zoomed);
+        var force = Main.d3.layout.force().charge(Main.Charge).linkDistance(Main.LinkDistance).size([width, height]);
+        Main.Svg = Main.d3.select('#canvas').append('svg').attr('width', width).attr('height', height)/*.call(Main.Zoom)*/.append('g');
         force.nodes(nodes).links(links).start();
-        Main.links = Main.svg.selectAll('.link').data(links).enter().append('line').attr('class', 'link');
-        Main.nodes = Main.svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 7).call(force.drag).on('mousemove', Main.onMouseMove).on('mouseover', Main.onMouseOver).on('mouseout', Main.onMouseOut).on('click', Main.onNodeClick);
-        Main.nodes.append('title').text(function (D:D3.Layout.GraphNode) {
+        Main.Links = Main.Svg.selectAll('.link').data(links).enter().append('line').attr('class', 'link');
+        Main.Nodes = Main.Svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 7).call(force.drag).on('mousemove', Main.onMouseMove).on('mouseover', Main.onMouseOver).on('mouseout', Main.onMouseOut).on('click', Main.onNodeClick);
+        Main.Nodes.append('title').text(function (D:D3.Layout.GraphNode) {
             return D.name;
         });
         force.on('tick', Main.update);
@@ -153,8 +163,8 @@ export class Main {
     static AutoCompleteSource(request, response) {
         var matcher = new RegExp("\\b" + $.ui.autocomplete.escapeRegex(request.term), "i");
         var matchArray:JQueryUI.AutocompleteItem[] = [];
-        for (var key in Main.friends){
-            if (matcher.test(Main.friends[key].name)) matchArray.push({ label: Main.friends[key].name, value: Main.friends[key].id });
+        for (var key in Main.Friends){
+            if (matcher.test(Main.Friends[key].name)) matchArray.push({ label: Main.Friends[key].name, value: Main.Friends[key].id });
         }
         response(matchArray);
         
@@ -163,7 +173,7 @@ export class Main {
         Main.SelectUser(ui.item.value);
     }
     static update () {
-        Main.links.attr('x1', function (D:D3.Layout.GraphLink) {
+        Main.Links.attr('x1', function (D:D3.Layout.GraphLink) {
             return (D.source.x);
         }).attr('y1', function (D: D3.Layout.GraphLink) {
                 return D.source.y;
@@ -172,25 +182,25 @@ export class Main {
         }).attr('y2', function (D: D3.Layout.GraphLink) {
                 return D.target.y;
         }).style('stroke-width', function (D: D3.Layout.GraphLink) {
-                if (!!Main.selectedID && Main.matchesTargetOrSource(D, Main.selectedID)) {
+                if (!!Main.SelectedID && Main.matchesTargetOrSource(D, Main.SelectedID)) {
                     return 2;
                 }
                 else {
                     return 1;
                 }
             });
-        Main.nodes.attr('cx', function (D:D3.Layout.GraphNode) {
+        Main.Nodes.attr('cx', function (D:D3.Layout.GraphNode) {
             return D.x;
         }).attr('cy', function (D: D3.Layout.GraphNode) {
                 return D.y;
         }).attr('fill', function (D: D3.Layout.GraphNode) {
-                if (!!!Main.selectedID) {
+                if (!!!Main.SelectedID) {
                     return 'black';
                 }
-                if (((Main.friends[Main.selectedID]).links.indexOf(D.id) >= 0)) {
+                if (((Main.Friends[Main.SelectedID]).links.indexOf(D.id) >= 0)) {
                     return 'red';
                 }
-                return (D.id.toString() == Main.selectedID) ? 'green' : 'black';
+                return (D.id.toString() == Main.SelectedID) ? 'green' : 'black';
             });
     }
     static onMouseMove (d) {
@@ -213,13 +223,33 @@ export class Main {
         Main.SelectUser(arg.id);
     }
     static zoomed(arg) {
-        Main.svg.attr('transform', 'translate(' + Main.d3.event.translate + ')scale(' + Main.d3.event.scale + ')');
+        Main.Svg.attr('transform', 'translate(' + Main.d3.event.translate + ')scale(' + Main.d3.event.scale + ')');
     }
     static matchesTargetOrSource(d:D3.Layout.GraphLink, id:string) {
         return (d.source.id == id || d.target.id == id);
     }
     static SelectUser(id: string) {
-        Main.selectedID = id == Main.selectedID ? null : id;
+        Main.SelectedID = id == Main.SelectedID ? null : id;
         Main.update();
+    }
+    static get Charge(): number {
+        var defaultCharge: number = -120;
+        var chargeTxt = $("#charge").val();
+        try {
+            return isNaN(parseInt(chargeTxt)) ? defaultCharge: parseInt(chargeTxt);
+        }
+        catch(err){
+            return defaultCharge;
+        }
+    }
+    static get LinkDistance(): number {
+        var defaultDist: number = 80;
+        var chargeTxt = $("#distance").val();
+        try {
+            return isNaN(parseInt(chargeTxt)) ? defaultDist : parseInt(chargeTxt);
+        }
+        catch (err) {
+            return defaultDist;
+        }
     }
 } 
