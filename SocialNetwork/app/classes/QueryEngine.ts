@@ -102,7 +102,7 @@ export class FQLQuery extends IQueryEngine {
             }
 
         }, (queryResponse?: any) => {
-                if (!!!queryResponse[0] || queryResponse.error || true) {
+                if (!!!queryResponse[0] || queryResponse.error) {
                     returnPromise.reject();
                 }
                 else {
