@@ -7,7 +7,8 @@ require.config({
     paths: {
         d3: "http://d3js.org/d3.v3.min",
         Facebook: "//connect.facebook.net/en_US/all",
-        jquery: "../lib/jquery"
+        jquery: "../lib/jquery",
+        jqueryUI: "../lib/jqueryui"
     },
     shim: {
         d3: {
@@ -16,7 +17,8 @@ require.config({
         Facebook: {
             exports: "FB"
         },
-        jquery: {
+        jqueryUI: {
+            deps: ["jquery"],
             exports: "$"
         }
 
@@ -26,7 +28,7 @@ require.config({
 
 
 
-require(['Main', "d3", "Facebook", "jquery"],
+require(['Main', "d3", "Facebook", "jqueryUI"],
     (main, d3, Facebook, $) => {
         // code from window.onload
         var facebookInfo = window.location.host == "localhost:26953" ?

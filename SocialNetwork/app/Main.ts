@@ -1,6 +1,7 @@
 /// <reference path="../scripts/typings/d3/d3.d.ts" />
 /// <reference path="../scripts/typings/jquery/jquery.d.ts" />
 /// <reference path="../scripts/typings/facebook/facebook.d.ts" />
+/// <reference path="../scripts/typings/jqueryui/jqueryui.d.ts" />
 
 import F = require("./classes/friend");
 import Q = require("./classes/queryengine");
@@ -141,6 +142,25 @@ export class Main {
             return D.name;
         });
         force.on('tick', Main.update);
+        Main.setupAutocomplete();
+    }
+    static setupAutocomplete() {
+        $("#friendsautocomplete").autocomplete({
+            select: Main.AutoCompleteValueSelect,
+            source: Main.AutoCompleteSource
+        });
+    }
+    static AutoCompleteSource(request, response) {
+        var matcher = new RegExp("\\b" + $.ui.autocomplete.escapeRegex(request.term), "i");
+        var matchArray:JQueryUI.AutocompleteItem[] = [];
+        for (var key in Main.friends){
+            if (matcher.test(Main.friends[key].name)) matchArray.push({ label: Main.friends[key].name, value: Main.friends[key].id });
+        }
+        response(matchArray);
+        
+    }
+    static AutoCompleteValueSelect(event, ui: JQueryUI.AutocompleteUIParams) {
+        Main.SelectUser(ui.item.value);
     }
     static update () {
         Main.links.attr('x1', function (D:D3.Layout.GraphLink) {
@@ -190,13 +210,16 @@ export class Main {
         callout.hide();
     }
     static onNodeClick(arg) {
-        Main.selectedID = (arg['id'] == Main.selectedID) ? null : arg['id'];
-        Main.update();
+        Main.SelectUser(arg.id);
     }
     static zoomed(arg) {
         Main.svg.attr('transform', 'translate(' + Main.d3.event.translate + ')scale(' + Main.d3.event.scale + ')');
     }
     static matchesTargetOrSource(d:D3.Layout.GraphLink, id:string) {
         return (d.source.id == id || d.target.id == id);
+    }
+    static SelectUser(id: string) {
+        Main.selectedID = id == Main.selectedID ? null : id;
+        Main.update();
     }
 } 

@@ -25,6 +25,7 @@
     <Content Include="app\Main.js" />
     <Content Include="default.htm" />
     <Content Include="lib\jquery.js" />
+    <Content Include="lib\jqueryui.js" />
     <Content Include="lib\require.js" />
     <Content Include="styles\SocialNetwork.css" />
     <Content Include="web.config" />
@@ -37,6 +38,7 @@
     <TypeScriptCompile Include="Scripts\typings\d3\d3.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\d3\plugins\d3.superformula.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\Facebook\facebook.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\jqueryui\jqueryui.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\requirejs\require.d.ts" />
   </ItemGroup>

@@ -1184,12 +1184,14 @@ declare module D3 {
             subindex?: number;
             startAngle?: number;
             endAngle?: number;
-            value?: number;
+            value?: string;
+            
             fixed?: boolean;
             children?: GraphNode[];
             _children?: GraphNode[];
             parent?: GraphNode;
             depth?: number;
+            label?: string;
         }
 
         export interface GraphLink {
