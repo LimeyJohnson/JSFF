@@ -9,7 +9,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <TypeScriptToolsVersion>0.9</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>1.0</TypeScriptToolsVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -24,6 +24,7 @@
     <Content Include="app\classes\QueryEngine.js" />
     <Content Include="app\Main.js" />
     <Content Include="default.htm" />
+    <Content Include="images\FBLogo.png" />
     <Content Include="lib\jquery.js" />
     <Content Include="lib\jqueryui.js" />
     <Content Include="lib\require.js" />

@@ -14,4 +14,3 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.FriendStats = FriendStats;
 });
-//# sourceMappingURL=friendstats.js.map

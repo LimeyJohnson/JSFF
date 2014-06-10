@@ -7,18 +7,33 @@
     padding: 5px;
     font-size: 12px;
     line-height: 1.4;
-    bottom:0;
-    left:0;
+    bottom: 0;
+    left: 0;
 }
 
 body {
 }
+
 .node {
-  stroke: #fff;
-  stroke-width: 1.5px;
+    stroke: #fff;
+    stroke-width: 1.5px;
 }
 
 .link {
-  stroke: #999;
-  stroke-opacity: .6;
+    stroke: #999;
+    stroke-opacity: .6;
+}
+
+.chartshow {
+    display: none;
+}
+
+.centered {
+    position: absolute;
+    width: 144px;
+    height: 144px;
+    top: 50%;
+    left: 50%;
+    margin-top: -72px;
+    margin-left: -72px;
 }

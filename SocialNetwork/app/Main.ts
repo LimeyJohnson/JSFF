@@ -24,7 +24,7 @@ export class Main {
     static Nodes: D3.Selection;
     static SelectedID: string;
     static FacebookInfo: fbInfo;
-    constructor(jQuery: JQueryStatic, d3: D3.Base, facebook: IFacebook, facebookInfo:fbInfo) {
+    constructor(jQuery: JQueryStatic, d3: D3.Base, facebook: IFacebook, facebookInfo: fbInfo) {
         Main.$ = jQuery;
         Main.d3 = d3;
         Main.FB = facebook;
@@ -33,7 +33,6 @@ export class Main {
     static start() {
         $(() => {
             $('#login').click((event) => Main.loginHandler(event));
-            $('#graph').click((event) => Main.graphFriends(event));
             FB.init({
                 appId: Main.FacebookInfo.appId,
                 channelUrl: Main.FacebookInfo.channelURL,
@@ -64,7 +63,7 @@ export class Main {
     }
     static clearVariables() {
         Main.Friends = {};
-        
+
         $('#canvas').empty();
         Main.Svg = null;
         Main.Links = null;
@@ -94,34 +93,31 @@ export class Main {
             friend.name = apiResponse.data[x].name;
             friend.index = x;
             Main.Friends[friend.id] = friend;
-            
+
         }
         Main.QueryEngine.RunQuery(Main.Friends, Main.FB).then((d: F.FriendMap) => {
             Main.Friends = d;
             S.FriendStats.GetFriendStats(Main.Friends);
-            $('body').append('FQL FriendsMap: ' + S.FriendStats.friendCount +"<br/>");
-            $('body').append('FQL LinksMap: ' + S.FriendStats.linkCount + "<br/>");
             Main.createSVG(start);
         }, (...reasons: any[]) => {
-            Main.QueryEngine = new Q.BatchQuery();
-            Main.QueryEngine.RunQuery(Main.Friends, Main.FB).then( (d)=> {
-                Main.Friends = d;
-                S.FriendStats.GetFriendStats(Main.Friends);
-                $('body').append('Multi FriendsMap: ' + S.FriendStats.friendCount + "<br/>");
-                $('body').append('Multi LinksMap: ' + S.FriendStats.linkCount + "<br/>");
+                Main.QueryEngine = new Q.BatchQuery();
+                Main.QueryEngine.RunQuery(Main.Friends, Main.FB).then((d) => {
+                    Main.Friends = d;
+                    S.FriendStats.GetFriendStats(Main.Friends);
                     Main.createSVG(start);
-            }, function (...reasons: any[]) {
-                window.alert("Failed Batch Query");
+                }, function (...reasons: any[]) {
+                        window.alert("Failed Batch Query");
                     });
             });
     }
-   
+
     static createSVG(start: number) {
+        $(".chartshow").show();
+        $(".charthide").hide();
         var finish: number = Main.Time;
         var milli = finish - start;
         var nodes: D3.Layout.GraphNode[] = [];
         var links: D3.Layout.GraphLink[] = [];
-        $('body').append('query took: ' + (milli / 1000) + "<br/>");
         var width = 960;
         var height = 800;
         for (var friendID in Main.Friends) {
@@ -134,21 +130,21 @@ export class Main {
             for (var x = 0; x < f.links.length; x++) {
                 if (f.id < f.links[x]) {
                     links.push({
-                    source: f.index,
+                        source: f.index,
                         target: (Main.Friends[f.links[x]]).index
                     });
                 }
             }
         }
-        $('body').append('Friends Nodes: ' + nodes.length + "<br/>");
-        $('body').append('Graph Links: ' + links.length + "<br/>");
+        $('body').append('Friends: ' + nodes.length + "<br/>");
+        $('body').append('Connections: ' + links.length + "<br/>");
         //Main.Zoom = Main.d3.behavior.zoom().scaleExtent([0.4, 4]).on('zoom',Main.zoomed);
         var force = Main.d3.layout.force().charge(Main.Charge).linkDistance(Main.LinkDistance).size([width, height]);
         Main.Svg = Main.d3.select('#canvas').append('svg').attr('width', width).attr('height', height)/*.call(Main.Zoom)*/.append('g');
         force.nodes(nodes).links(links).start();
         Main.Links = Main.Svg.selectAll('.link').data(links).enter().append('line').attr('class', 'link');
         Main.Nodes = Main.Svg.selectAll('.node').data(nodes).enter().append('circle').attr('class', 'node').attr('r', 7).call(force.drag).on('mousemove', Main.onMouseMove).on('mouseover', Main.onMouseOver).on('mouseout', Main.onMouseOut).on('click', Main.onNodeClick);
-        Main.Nodes.append('title').text(function (D:D3.Layout.GraphNode) {
+        Main.Nodes.append('title').text(function (D: D3.Layout.GraphNode) {
             return D.name;
         });
         force.on('tick', Main.update);
@@ -162,26 +158,26 @@ export class Main {
     }
     static AutoCompleteSource(request, response) {
         var matcher = new RegExp("\\b" + $.ui.autocomplete.escapeRegex(request.term), "i");
-        var matchArray:JQueryUI.AutocompleteItem[] = [];
-        for (var key in Main.Friends){
+        var matchArray: JQueryUI.AutocompleteItem[] = [];
+        for (var key in Main.Friends) {
             if (matcher.test(Main.Friends[key].name)) matchArray.push({ label: Main.Friends[key].name, value: Main.Friends[key].id });
         }
         response(matchArray);
-        
+
     }
     static AutoCompleteValueSelect(event, ui: JQueryUI.AutocompleteUIParams) {
         Main.SelectUser(ui.item.value);
     }
-    static update () {
-        Main.Links.attr('x1', function (D:D3.Layout.GraphLink) {
+    static update() {
+        Main.Links.attr('x1', function (D: D3.Layout.GraphLink) {
             return (D.source.x);
         }).attr('y1', function (D: D3.Layout.GraphLink) {
                 return D.source.y;
-        }).attr('x2', function (D: D3.Layout.GraphLink) {
+            }).attr('x2', function (D: D3.Layout.GraphLink) {
                 return D.target.x;
-        }).attr('y2', function (D: D3.Layout.GraphLink) {
+            }).attr('y2', function (D: D3.Layout.GraphLink) {
                 return D.target.y;
-        }).style('stroke-width', function (D: D3.Layout.GraphLink) {
+            }).style('stroke-width', function (D: D3.Layout.GraphLink) {
                 if (!!Main.SelectedID && Main.matchesTargetOrSource(D, Main.SelectedID)) {
                     return 2;
                 }
@@ -189,11 +185,11 @@ export class Main {
                     return 1;
                 }
             });
-        Main.Nodes.attr('cx', function (D:D3.Layout.GraphNode) {
+        Main.Nodes.attr('cx', function (D: D3.Layout.GraphNode) {
             return D.x;
         }).attr('cy', function (D: D3.Layout.GraphNode) {
                 return D.y;
-        }).attr('fill', function (D: D3.Layout.GraphNode) {
+            }).attr('fill', function (D: D3.Layout.GraphNode) {
                 if (!!!Main.SelectedID) {
                     return 'black';
                 }
@@ -203,16 +199,16 @@ export class Main {
                 return (D.id.toString() == Main.SelectedID) ? 'green' : 'black';
             });
     }
-    static onMouseMove (d) {
+    static onMouseMove(d) {
         Main.d3.event.stopPropagation();
         var callout = $('#callout');
     }
-    static onMouseOver (d:D3.Layout.GraphNode) {
+    static onMouseOver(d: D3.Layout.GraphNode) {
         Main.d3.event.stopPropagation();
         var callout = $('#callout');
         callout.show();
-        var template:string = "<p><img src='http://graph.facebook.com/{0}/picture' alt='{1}' height='100' width='100'></p><p>{1} ({0})</p>";
-        callout.html(template.replace("{0}", d.id).replace("{0}", d.id).replace("{1}", d.name).replace("{1}",d.name));
+        var template: string = "<p><img src='http://graph.facebook.com/{0}/picture' alt='{1}' height='100' width='100'></p><p>{1} ({0})</p>";
+        callout.html(template.replace("{0}", d.id).replace("{0}", d.id).replace("{1}", d.name).replace("{1}", d.name));
     }
     static onMouseOut = function (d) {
         Main.d3.event.stopPropagation();
@@ -225,7 +221,7 @@ export class Main {
     static zoomed(arg) {
         Main.Svg.attr('transform', 'translate(' + Main.d3.event.translate + ')scale(' + Main.d3.event.scale + ')');
     }
-    static matchesTargetOrSource(d:D3.Layout.GraphLink, id:string) {
+    static matchesTargetOrSource(d: D3.Layout.GraphLink, id: string) {
         return (d.source.id == id || d.target.id == id);
     }
     static SelectUser(id: string) {
@@ -236,9 +232,9 @@ export class Main {
         var defaultCharge: number = -120;
         var chargeTxt = $("#charge").val();
         try {
-            return isNaN(parseInt(chargeTxt)) ? defaultCharge: parseInt(chargeTxt);
+            return isNaN(parseInt(chargeTxt)) ? defaultCharge : parseInt(chargeTxt);
         }
-        catch(err){
+        catch (err) {
             return defaultCharge;
         }
     }
